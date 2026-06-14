@@ -1,5 +1,5 @@
 import { apiClient } from '../../lib/api-client';
-import type { AdminDashboard, DashboardSummary, EmployeeDashboard, ManagerDashboard } from './types';
+import type { AdminDashboard, DashboardSummary, EmployeeDashboard, FinanceDashboard, ManagerDashboard } from './types';
 
 export async function getDashboardSummary() {
   const response = await apiClient.get<DashboardSummary>('/dashboard/summary');
@@ -18,5 +18,10 @@ export async function getAdminDashboard() {
 
 export async function getManagerDashboard() {
   const response = await apiClient.get<ManagerDashboard>('/dashboard/manager');
+  return response.data;
+}
+
+export async function getFinanceDashboard() {
+  const response = await apiClient.get<FinanceDashboard>('/dashboard/finance');
   return response.data;
 }

@@ -20,6 +20,8 @@ public interface ExpenseClaimRepository extends JpaRepository<ExpenseClaim, Long
 
     long countByStatus(ClaimStatus status);
 
+    long countByStatusIn(Collection<ClaimStatus> statuses);
+
     @Query("select coalesce(sum(claim.amount), 0) from ExpenseClaim claim")
     BigDecimal sumAllAmounts();
 
@@ -94,6 +96,46 @@ public interface ExpenseClaimRepository extends JpaRepository<ExpenseClaim, Long
 
     @Query("select coalesce(sum(claim.amount), 0) from ExpenseClaim claim where claim.status = :status")
     BigDecimal sumAmountByStatus(ClaimStatus status);
+
+    @Query("""
+            select claim.status, count(claim), coalesce(sum(claim.amount), 0)
+            from ExpenseClaim claim
+            where claim.status in :statuses
+            group by claim.status
+            """)
+    List<Object[]> financeStatusBreakdown(Collection<ClaimStatus> statuses);
+
+    @Query("select claim from ExpenseClaim claim where claim.status = :status and claim.paidAt >= :paidFrom")
+    List<ExpenseClaim> findPaidClaimsSince(ClaimStatus status, java.time.OffsetDateTime paidFrom);
+
+    @Query("""
+            select claim.category.name, count(claim), coalesce(sum(claim.amount), 0)
+            from ExpenseClaim claim
+            where claim.status in :statuses
+            group by claim.category.name
+            order by coalesce(sum(claim.amount), 0) desc
+            """)
+    List<Object[]> financeCategoryBreakdown(Collection<ClaimStatus> statuses);
+
+    @Query("""
+            select coalesce(department.name, 'Unassigned'), count(claim), coalesce(sum(claim.amount), 0)
+            from ExpenseClaim claim
+            join claim.employee employee
+            left join employee.department department
+            where claim.status in :statuses
+            group by department.name
+            order by coalesce(sum(claim.amount), 0) desc
+            """)
+    List<Object[]> financeDepartmentBreakdown(Collection<ClaimStatus> statuses);
+
+    @Query("""
+            select claim from ExpenseClaim claim
+            join claim.employee employee
+            left join employee.department department
+            where claim.status in :statuses
+            order by coalesce(claim.financeReviewedAt, claim.managerReviewedAt, claim.updatedAt) desc
+            """)
+    List<ExpenseClaim> findRecentFinanceReviewClaims(Collection<ClaimStatus> statuses, Pageable pageable);
 
     @Query("""
             select claim.status, count(claim), coalesce(sum(claim.amount), 0)

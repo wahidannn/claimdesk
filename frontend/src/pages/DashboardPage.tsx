@@ -19,13 +19,15 @@ import {
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../features/auth/useAuth';
-import { getAdminDashboard, getDashboardSummary, getEmployeeDashboard, getManagerDashboard } from '../features/dashboard/api';
+import { getAdminDashboard, getEmployeeDashboard, getFinanceDashboard, getManagerDashboard } from '../features/dashboard/api';
 import type {
   AdminDashboard,
   DashboardBreakdownItem,
   EmployeeDashboard,
+  FinanceDashboard,
   ManagerDashboard,
   RecentEmployeeClaim,
+  RecentFinanceClaim,
   RecentManagerClaim,
 } from '../features/dashboard/types';
 import { formatCurrency } from '../features/claims/currency';
@@ -33,11 +35,6 @@ import type { ClaimStatus } from '../features/claims/types';
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const summaryQuery = useQuery({
-    queryKey: ['dashboard-summary'],
-    queryFn: getDashboardSummary,
-    enabled: user?.role === 'FINANCE',
-  });
   const employeeDashboardQuery = useQuery({
     queryKey: ['employee-dashboard'],
     queryFn: getEmployeeDashboard,
@@ -53,7 +50,11 @@ export function DashboardPage() {
     queryFn: getManagerDashboard,
     enabled: user?.role === 'MANAGER',
   });
-  const summary = summaryQuery.data;
+  const financeDashboardQuery = useQuery({
+    queryKey: ['finance-dashboard'],
+    queryFn: getFinanceDashboard,
+    enabled: user?.role === 'FINANCE',
+  });
 
   if (!user) {
     return null;
@@ -98,20 +99,12 @@ export function DashboardPage() {
         />
       )}
 
-      {user.role === 'FINANCE' && summaryQuery.isLoading && (
-        <div className="text-sm text-slate-500">Loading dashboard...</div>
-      )}
-
-      {user.role === 'FINANCE' && summary && (
-        <>
-          <section className="grid gap-4 md:grid-cols-4">
-            <SummaryCard title="Pending Review" value={summary.pendingFinanceReview ?? 0} />
-            <SummaryCard title="Finance Approved" value={summary.financeApproved ?? 0} />
-            <SummaryCard title="Paid Claims" value={summary.paidClaims ?? 0} />
-            <SummaryCard title="Paid Amount" value={formatCurrency(summary.paidAmount ?? 0)} />
-          </section>
-
-        </>
+      {user.role === 'FINANCE' && (
+        <FinanceDashboardView
+          dashboard={financeDashboardQuery.data}
+          isLoading={financeDashboardQuery.isLoading}
+          isError={financeDashboardQuery.isError}
+        />
       )}
     </div>
   );
@@ -444,6 +437,114 @@ function ManagerDashboardView({
   );
 }
 
+function FinanceDashboardView({
+  dashboard,
+  isLoading,
+  isError,
+}: {
+  dashboard: FinanceDashboard | undefined;
+  isLoading: boolean;
+  isError: boolean;
+}) {
+  if (isLoading) {
+    return <EmployeeDashboardSkeleton />;
+  }
+
+  if (isError) {
+    return (
+      <section className="rounded border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+        Finance dashboard could not be loaded. Please refresh the page.
+      </section>
+    );
+  }
+
+  if (!dashboard) {
+    return null;
+  }
+
+  const hasFinanceClaims = dashboard.statusBreakdown.some((item) => item.count > 0);
+  const hasReviewClaims = dashboard.recentReviewClaims.length > 0;
+
+  return (
+    <div className="space-y-6">
+      <section className="grid gap-4 lg:grid-cols-[1.35fr_0.95fr]">
+        <article className="rounded border border-border bg-surface p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-slate-500">Pending review amount</p>
+              <p className="mt-3 text-3xl font-semibold text-ink">{formatCurrency(dashboard.summary.pendingReviewAmount)}</p>
+            </div>
+            <div className="flex h-11 w-11 items-center justify-center rounded bg-amber-50 text-amber-700">
+              <WalletCards size={22} />
+            </div>
+          </div>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <AmountPanel label="Approved amount" value={dashboard.summary.approvedAmount} tone="amber" />
+            <AmountPanel label="Paid amount" value={dashboard.summary.paidAmount} tone="green" />
+            <AmountPanel label="Pending payment" value={dashboard.summary.pendingPaymentClaims} tone="blue" format="number" />
+          </div>
+        </article>
+
+        <article className="rounded border border-border bg-surface p-6">
+          <p className="text-sm font-medium text-slate-500">Finance actions</p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <DashboardLink to="/finance-review" label="Open finance review" />
+            <DashboardLink to="/reports" label="Open reports" />
+            <DashboardLink to="/categories" label="Manage categories" />
+          </div>
+        </article>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-5">
+        <SummaryCard title="Pending Review" value={dashboard.summary.pendingFinanceReview} />
+        <SummaryCard title="Finance Approved" value={dashboard.summary.financeApproved} />
+        <SummaryCard title="Pending Payment" value={dashboard.summary.pendingPaymentClaims} />
+        <SummaryCard title="Paid Claims" value={dashboard.summary.paidClaims} />
+        <SummaryCard title="Finance Claims" value={dashboard.summary.totalFinanceClaims} />
+      </section>
+
+      {hasFinanceClaims ? (
+        <>
+          <section className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+            <ChartPanel title="Finance status overview">
+              <StatusPieChart data={dashboard.statusBreakdown.filter((item) => item.count > 0)} />
+            </ChartPanel>
+            <ChartPanel title="Monthly paid amount">
+              <MonthlyAmountChart data={dashboard.monthlyPaidTrend} />
+            </ChartPanel>
+          </section>
+
+          <section className="grid gap-4 xl:grid-cols-[1fr_1fr]">
+            <ChartPanel title="Category finance value">
+              <CategoryBreakdownChart data={dashboard.categoryBreakdown.slice(0, 6)} />
+            </ChartPanel>
+            <ChartPanel title="Department finance value">
+              <CategoryBreakdownChart data={dashboard.departmentBreakdown.slice(0, 6)} />
+            </ChartPanel>
+          </section>
+        </>
+      ) : (
+        <section className="rounded border border-border bg-surface p-8 text-center">
+          <h2 className="text-lg font-semibold text-ink">No finance claim data yet</h2>
+          <p className="mt-2 text-sm text-slate-600">Claims approved by managers will appear here for finance review.</p>
+        </section>
+      )}
+
+      {hasReviewClaims ? (
+        <RecentFinanceClaimsTable claims={dashboard.recentReviewClaims} />
+      ) : (
+        <section className="rounded border border-border bg-surface p-8 text-center">
+          <h2 className="text-lg font-semibold text-ink">No finance review queue</h2>
+          <p className="mt-2 text-sm text-slate-600">There are no manager-approved or payment-ready claims right now.</p>
+          <Button asChild className="mt-5" variant="secondary">
+            <Link to="/finance-review">Open finance review</Link>
+          </Button>
+        </section>
+      )}
+    </div>
+  );
+}
+
 function DashboardAction({ role }: { role: string }) {
   if (role === 'EMPLOYEE') {
     return (
@@ -672,6 +773,41 @@ function RecentManagerClaimsTable({ claims }: { claims: RecentManagerClaim[] }) 
                   </Link>
                   <p className="mt-1 text-xs text-slate-500">
                     {claim.employeeName} - {claim.categoryName} - {claim.transactionDate}
+                  </p>
+                </td>
+                <td className="px-4 py-3 text-right font-medium">{formatCurrency(claim.amount)}</td>
+                <td className="px-4 py-3 text-right">
+                  <StatusBadge status={claim.status} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  );
+}
+
+function RecentFinanceClaimsTable({ claims }: { claims: RecentFinanceClaim[] }) {
+  return (
+    <article className="rounded border border-border bg-surface p-5">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold text-ink">Recent finance review</h2>
+        <Button asChild variant="ghost" className="h-8 px-2">
+          <Link to="/finance-review">View all</Link>
+        </Button>
+      </div>
+      <div className="mt-4 overflow-hidden rounded border border-border">
+        <table className="min-w-full divide-y divide-border text-sm">
+          <tbody className="divide-y divide-border bg-surface">
+            {claims.map((claim) => (
+              <tr key={claim.id} className="hover:bg-muted">
+                <td className="px-4 py-3">
+                  <Link to={`/finance-review/${claim.id}`} className="font-medium text-ink hover:text-accent">
+                    {claim.title}
+                  </Link>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {claim.employeeName} - {claim.departmentName} - {claim.categoryName}
                   </p>
                 </td>
                 <td className="px-4 py-3 text-right font-medium">{formatCurrency(claim.amount)}</td>

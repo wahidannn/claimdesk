@@ -3,6 +3,7 @@ package com.claimdesk.controller;
 import com.claimdesk.dto.AdminDashboardResponse;
 import com.claimdesk.dto.DashboardSummaryResponse;
 import com.claimdesk.dto.EmployeeDashboardResponse;
+import com.claimdesk.dto.FinanceDashboardResponse;
 import com.claimdesk.dto.ManagerDashboardResponse;
 import com.claimdesk.service.DashboardService;
 import java.security.Principal;
@@ -38,5 +39,10 @@ public class DashboardController {
     @GetMapping("/manager")
     public ManagerDashboardResponse getManagerDashboard(Principal principal) {
         return dashboardService.getManagerDashboard(principal.getName());
+    }
+
+    @GetMapping("/finance")
+    public FinanceDashboardResponse getFinanceDashboard(Principal principal) {
+        return dashboardService.getFinanceDashboard(principal.getName());
     }
 }

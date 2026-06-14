@@ -105,3 +105,35 @@ export type ManagerDashboard = {
   employeeBreakdown: DashboardBreakdownItem[];
   recentPendingClaims: RecentManagerClaim[];
 };
+
+export type FinanceDashboardSummary = {
+  pendingFinanceReview: number;
+  financeApproved: number;
+  paidClaims: number;
+  pendingPaymentClaims: number;
+  pendingReviewAmount: number;
+  approvedAmount: number;
+  paidAmount: number;
+  totalFinanceClaims: number;
+};
+
+export type RecentFinanceClaim = {
+  id: number;
+  title: string;
+  amount: number;
+  status: ClaimStatus;
+  employeeName: string;
+  departmentName: string;
+  categoryName: string;
+  transactionDate: string;
+  reviewedAt: string | null;
+};
+
+export type FinanceDashboard = {
+  summary: FinanceDashboardSummary;
+  statusBreakdown: DashboardBreakdownItem[];
+  monthlyPaidTrend: DashboardBreakdownItem[];
+  categoryBreakdown: DashboardBreakdownItem[];
+  departmentBreakdown: DashboardBreakdownItem[];
+  recentReviewClaims: RecentFinanceClaim[];
+};

@@ -8,6 +8,9 @@ import com.claimdesk.dto.DashboardSummaryResponse;
 import com.claimdesk.dto.EmployeeDashboardResponse;
 import com.claimdesk.dto.EmployeeDashboardSummaryResponse;
 import com.claimdesk.dto.EmployeeRecentClaimResponse;
+import com.claimdesk.dto.FinanceDashboardResponse;
+import com.claimdesk.dto.FinanceDashboardSummaryResponse;
+import com.claimdesk.dto.FinanceRecentClaimResponse;
 import com.claimdesk.dto.ManagerDashboardResponse;
 import com.claimdesk.dto.ManagerDashboardSummaryResponse;
 import com.claimdesk.dto.ManagerRecentClaimResponse;
@@ -23,7 +26,9 @@ import com.claimdesk.repository.ExpenseClaimRepository;
 import com.claimdesk.repository.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.YearMonth;
+import java.time.ZoneOffset;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +40,17 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class DashboardService {
+
+    private static final List<ClaimStatus> FINANCE_DASHBOARD_STATUSES = List.of(
+            ClaimStatus.MANAGER_APPROVED,
+            ClaimStatus.FINANCE_APPROVED,
+            ClaimStatus.PAID
+    );
+
+    private static final List<ClaimStatus> FINANCE_REVIEW_STATUSES = List.of(
+            ClaimStatus.MANAGER_APPROVED,
+            ClaimStatus.FINANCE_APPROVED
+    );
 
     private final ExpenseClaimRepository claimRepository;
     private final UserRepository userRepository;
@@ -167,6 +183,36 @@ public class DashboardService {
                 managerCategoryBreakdown(managerId),
                 managerEmployeeBreakdown(managerId),
                 recentPendingManagerClaims(managerId)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public FinanceDashboardResponse getFinanceDashboard(String email) {
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        if (user.getRole() != Role.FINANCE) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Finance dashboard is only available for finance users");
+        }
+
+        FinanceDashboardSummaryResponse summary = new FinanceDashboardSummaryResponse(
+                claimRepository.countByStatus(ClaimStatus.MANAGER_APPROVED),
+                claimRepository.countByStatus(ClaimStatus.FINANCE_APPROVED),
+                claimRepository.countByStatus(ClaimStatus.PAID),
+                claimRepository.countByStatus(ClaimStatus.FINANCE_APPROVED),
+                claimRepository.sumAmountByStatus(ClaimStatus.MANAGER_APPROVED),
+                claimRepository.sumAmountByStatus(ClaimStatus.FINANCE_APPROVED),
+                claimRepository.sumAmountByStatus(ClaimStatus.PAID),
+                claimRepository.countByStatusIn(FINANCE_DASHBOARD_STATUSES)
+        );
+
+        return new FinanceDashboardResponse(
+                summary,
+                financeStatusBreakdown(),
+                financeMonthlyPaidTrend(),
+                financeCategoryBreakdown(),
+                financeDepartmentBreakdown(),
+                recentFinanceReviewClaims()
         );
     }
 
@@ -478,6 +524,78 @@ public class DashboardService {
                         claim.getCategory().getName(),
                         claim.getTransactionDate(),
                         claim.getSubmittedAt()
+                ))
+                .toList();
+    }
+
+    private List<DashboardBreakdownResponse> financeStatusBreakdown() {
+        Map<ClaimStatus, DashboardBreakdownResponse> breakdown = new EnumMap<>(ClaimStatus.class);
+        claimRepository.financeStatusBreakdown(FINANCE_DASHBOARD_STATUSES)
+                .forEach(row -> {
+                    ClaimStatus status = (ClaimStatus) row[0];
+                    breakdown.put(status, new DashboardBreakdownResponse(status.name(), (Long) row[1], (BigDecimal) row[2]));
+                });
+
+        return FINANCE_DASHBOARD_STATUSES.stream()
+                .map(status -> breakdown.getOrDefault(status, new DashboardBreakdownResponse(status.name(), 0L, BigDecimal.ZERO)))
+                .toList();
+    }
+
+    private List<DashboardBreakdownResponse> financeMonthlyPaidTrend() {
+        YearMonth currentMonth = YearMonth.now();
+        YearMonth firstMonth = currentMonth.minusMonths(5);
+        Map<YearMonth, MonthlyTotal> totals = new java.util.LinkedHashMap<>();
+
+        for (int i = 0; i < 6; i++) {
+            totals.put(firstMonth.plusMonths(i), new MonthlyTotal());
+        }
+
+        OffsetDateTime startDate = firstMonth.atDay(1).atStartOfDay().atOffset(ZoneOffset.UTC);
+        for (ExpenseClaim claim : claimRepository.findPaidClaimsSince(ClaimStatus.PAID, startDate)) {
+            if (claim.getPaidAt() == null) {
+                continue;
+            }
+            YearMonth month = YearMonth.from(claim.getPaidAt());
+            MonthlyTotal total = totals.get(month);
+            if (total != null) {
+                total.count++;
+                total.amount = total.amount.add(claim.getAmount());
+            }
+        }
+
+        return totals.entrySet()
+                .stream()
+                .map(entry -> new DashboardBreakdownResponse(entry.getKey().toString(), entry.getValue().count, entry.getValue().amount))
+                .toList();
+    }
+
+    private List<DashboardBreakdownResponse> financeCategoryBreakdown() {
+        return claimRepository.financeCategoryBreakdown(FINANCE_DASHBOARD_STATUSES)
+                .stream()
+                .map(row -> new DashboardBreakdownResponse((String) row[0], (Long) row[1], (BigDecimal) row[2]))
+                .toList();
+    }
+
+    private List<DashboardBreakdownResponse> financeDepartmentBreakdown() {
+        return claimRepository.financeDepartmentBreakdown(FINANCE_DASHBOARD_STATUSES)
+                .stream()
+                .map(row -> new DashboardBreakdownResponse((String) row[0], (Long) row[1], (BigDecimal) row[2]))
+                .toList();
+    }
+
+    private List<FinanceRecentClaimResponse> recentFinanceReviewClaims() {
+        return claimRepository.findRecentFinanceReviewClaims(FINANCE_REVIEW_STATUSES, PageRequest.of(0, 5))
+                .stream()
+                .map(claim -> new FinanceRecentClaimResponse(
+                        claim.getId(),
+                        claim.getTitle(),
+                        claim.getAmount(),
+                        claim.getStatus(),
+                        claim.getEmployee().getName(),
+                        claim.getEmployee().getDepartment() == null ? "Unassigned" : claim.getEmployee().getDepartment().getName(),
+                        claim.getCategory().getName(),
+                        claim.getTransactionDate(),
+                        claim.getFinanceReviewedAt() == null ? claim.getManagerReviewedAt() : claim.getFinanceReviewedAt()
                 ))
                 .toList();
     }
