@@ -76,3 +76,32 @@ export type AdminDashboard = {
   categoryBreakdown: DashboardBreakdownItem[];
   recentAuditLogs: AuditLog[];
 };
+
+export type ManagerDashboardSummary = {
+  pendingApprovals: number;
+  approvedByManager: number;
+  rejectedByManager: number;
+  pendingAmount: number;
+  reviewedAmount: number;
+  totalDepartmentClaims: number;
+};
+
+export type RecentManagerClaim = {
+  id: number;
+  title: string;
+  amount: number;
+  status: ClaimStatus;
+  employeeName: string;
+  categoryName: string;
+  transactionDate: string;
+  submittedAt: string | null;
+};
+
+export type ManagerDashboard = {
+  summary: ManagerDashboardSummary;
+  statusBreakdown: DashboardBreakdownItem[];
+  monthlyTrend: DashboardBreakdownItem[];
+  categoryBreakdown: DashboardBreakdownItem[];
+  employeeBreakdown: DashboardBreakdownItem[];
+  recentPendingClaims: RecentManagerClaim[];
+};

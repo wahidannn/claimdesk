@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, FilePlus2, ShieldCheck, WalletCards } from 'lucide-react';
+import { ArrowRight, ClipboardCheck, FilePlus2, ShieldCheck, WalletCards } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -19,8 +19,15 @@ import {
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../features/auth/useAuth';
-import { getAdminDashboard, getDashboardSummary, getEmployeeDashboard } from '../features/dashboard/api';
-import type { AdminDashboard, DashboardBreakdownItem, EmployeeDashboard, RecentEmployeeClaim } from '../features/dashboard/types';
+import { getAdminDashboard, getDashboardSummary, getEmployeeDashboard, getManagerDashboard } from '../features/dashboard/api';
+import type {
+  AdminDashboard,
+  DashboardBreakdownItem,
+  EmployeeDashboard,
+  ManagerDashboard,
+  RecentEmployeeClaim,
+  RecentManagerClaim,
+} from '../features/dashboard/types';
 import { formatCurrency } from '../features/claims/currency';
 import type { ClaimStatus } from '../features/claims/types';
 
@@ -29,7 +36,7 @@ export function DashboardPage() {
   const summaryQuery = useQuery({
     queryKey: ['dashboard-summary'],
     queryFn: getDashboardSummary,
-    enabled: user?.role !== 'EMPLOYEE' && user?.role !== 'ADMIN',
+    enabled: user?.role === 'FINANCE',
   });
   const employeeDashboardQuery = useQuery({
     queryKey: ['employee-dashboard'],
@@ -40,6 +47,11 @@ export function DashboardPage() {
     queryKey: ['admin-dashboard'],
     queryFn: getAdminDashboard,
     enabled: user?.role === 'ADMIN',
+  });
+  const managerDashboardQuery = useQuery({
+    queryKey: ['manager-dashboard'],
+    queryFn: getManagerDashboard,
+    enabled: user?.role === 'MANAGER',
   });
   const summary = summaryQuery.data;
 
@@ -78,28 +90,26 @@ export function DashboardPage() {
         />
       )}
 
-      {user.role !== 'EMPLOYEE' && user.role !== 'ADMIN' && summaryQuery.isLoading && (
+      {user.role === 'MANAGER' && (
+        <ManagerDashboardView
+          dashboard={managerDashboardQuery.data}
+          isLoading={managerDashboardQuery.isLoading}
+          isError={managerDashboardQuery.isError}
+        />
+      )}
+
+      {user.role === 'FINANCE' && summaryQuery.isLoading && (
         <div className="text-sm text-slate-500">Loading dashboard...</div>
       )}
 
-      {user.role !== 'EMPLOYEE' && user.role !== 'ADMIN' && summary && (
+      {user.role === 'FINANCE' && summary && (
         <>
-          {user.role === 'MANAGER' && (
-            <section className="grid gap-4 md:grid-cols-3">
-              <SummaryCard title="Pending Approval" value={summary.pendingApprovals ?? 0} />
-              <SummaryCard title="Approved" value={summary.approvedByManager ?? 0} />
-              <SummaryCard title="Rejected" value={summary.rejectedByManager ?? 0} />
-            </section>
-          )}
-
-          {user.role === 'FINANCE' && (
-            <section className="grid gap-4 md:grid-cols-4">
-              <SummaryCard title="Pending Review" value={summary.pendingFinanceReview ?? 0} />
-              <SummaryCard title="Finance Approved" value={summary.financeApproved ?? 0} />
-              <SummaryCard title="Paid Claims" value={summary.paidClaims ?? 0} />
-              <SummaryCard title="Paid Amount" value={formatCurrency(summary.paidAmount ?? 0)} />
-            </section>
-          )}
+          <section className="grid gap-4 md:grid-cols-4">
+            <SummaryCard title="Pending Review" value={summary.pendingFinanceReview ?? 0} />
+            <SummaryCard title="Finance Approved" value={summary.financeApproved ?? 0} />
+            <SummaryCard title="Paid Claims" value={summary.paidClaims ?? 0} />
+            <SummaryCard title="Paid Amount" value={formatCurrency(summary.paidAmount ?? 0)} />
+          </section>
 
         </>
       )}
@@ -317,6 +327,123 @@ function AdminDashboardView({
   );
 }
 
+function ManagerDashboardView({
+  dashboard,
+  isLoading,
+  isError,
+}: {
+  dashboard: ManagerDashboard | undefined;
+  isLoading: boolean;
+  isError: boolean;
+}) {
+  if (isLoading) {
+    return <EmployeeDashboardSkeleton />;
+  }
+
+  if (isError) {
+    return (
+      <section className="rounded border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+        Manager dashboard could not be loaded. Please refresh the page.
+      </section>
+    );
+  }
+
+  if (!dashboard) {
+    return null;
+  }
+
+  const hasClaims = dashboard.statusBreakdown.some((item) => item.count > 0);
+  const hasPendingClaims = dashboard.recentPendingClaims.length > 0;
+
+  return (
+    <div className="space-y-6">
+      <section className="grid gap-4 lg:grid-cols-[1.35fr_0.95fr]">
+        <article className="rounded border border-border bg-surface p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-slate-500">Pending approval amount</p>
+              <p className="mt-3 text-3xl font-semibold text-ink">{formatCurrency(dashboard.summary.pendingAmount)}</p>
+            </div>
+            <div className="flex h-11 w-11 items-center justify-center rounded bg-blue-50 text-accent">
+              <ClipboardCheck size={22} />
+            </div>
+          </div>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <AmountPanel label="Pending approvals" value={dashboard.summary.pendingApprovals} tone="blue" format="number" />
+            <AmountPanel label="Reviewed amount" value={dashboard.summary.reviewedAmount} tone="green" />
+            <AmountPanel label="Department claims" value={dashboard.summary.totalDepartmentClaims} tone="slate" format="number" />
+          </div>
+        </article>
+
+        <article className="rounded border border-border bg-surface p-6">
+          <p className="text-sm font-medium text-slate-500">Approval actions</p>
+          <div className="mt-5 space-y-3">
+            <Button asChild className="w-full justify-between">
+              <Link to="/approvals">
+                Open approval queue
+                <ArrowRight size={16} />
+              </Link>
+            </Button>
+            <Button asChild className="w-full justify-between" variant="secondary">
+              <Link to="/reports">
+                View reports
+                <ArrowRight size={16} />
+              </Link>
+            </Button>
+          </div>
+        </article>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-5">
+        <SummaryCard title="Pending" value={dashboard.summary.pendingApprovals} />
+        <SummaryCard title="Approved" value={dashboard.summary.approvedByManager} />
+        <SummaryCard title="Rejected" value={dashboard.summary.rejectedByManager} />
+        <SummaryCard title="Department Claims" value={dashboard.summary.totalDepartmentClaims} />
+        <SummaryCard title="Reviewed Amount" value={formatCurrency(dashboard.summary.reviewedAmount)} />
+      </section>
+
+      {hasClaims ? (
+        <>
+          <section className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+            <ChartPanel title="Approval status overview">
+              <StatusPieChart data={dashboard.statusBreakdown.filter((item) => item.count > 0)} />
+            </ChartPanel>
+            <ChartPanel title="Monthly department amount">
+              <MonthlyAmountChart data={dashboard.monthlyTrend} />
+            </ChartPanel>
+          </section>
+
+          <section className="grid gap-4 xl:grid-cols-[1fr_1fr]">
+            <ChartPanel title="Category amount">
+              <CategoryBreakdownChart data={dashboard.categoryBreakdown.slice(0, 6)} />
+            </ChartPanel>
+            <ChartPanel title="Employee amount">
+              <CategoryBreakdownChart data={dashboard.employeeBreakdown.slice(0, 6)} />
+            </ChartPanel>
+          </section>
+        </>
+      ) : (
+        <section className="rounded border border-border bg-surface p-8 text-center">
+          <h2 className="text-lg font-semibold text-ink">No department claim data yet</h2>
+          <p className="mt-2 text-sm text-slate-600">Submitted claims from your department will appear here.</p>
+        </section>
+      )}
+
+      {hasPendingClaims ? (
+        <RecentManagerClaimsTable claims={dashboard.recentPendingClaims} />
+      ) : (
+        <section className="rounded border border-border bg-surface p-8 text-center">
+          <h2 className="text-lg font-semibold text-ink">No pending approvals</h2>
+          <p className="mt-2 text-sm text-slate-600">Your approval queue is clear right now.</p>
+          <Button asChild className="mt-5" variant="secondary">
+            <Link to="/approvals">Open approval queue</Link>
+          </Button>
+        </section>
+      )}
+    </div>
+  );
+}
+
 function DashboardAction({ role }: { role: string }) {
   if (role === 'EMPLOYEE') {
     return (
@@ -511,6 +638,41 @@ function RecentClaimsTable({ claims }: { claims: RecentEmployeeClaim[] }) {
                     {claim.title}
                   </Link>
                   <p className="mt-1 text-xs text-slate-500">{claim.categoryName} - {claim.transactionDate}</p>
+                </td>
+                <td className="px-4 py-3 text-right font-medium">{formatCurrency(claim.amount)}</td>
+                <td className="px-4 py-3 text-right">
+                  <StatusBadge status={claim.status} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  );
+}
+
+function RecentManagerClaimsTable({ claims }: { claims: RecentManagerClaim[] }) {
+  return (
+    <article className="rounded border border-border bg-surface p-5">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold text-ink">Recent pending approvals</h2>
+        <Button asChild variant="ghost" className="h-8 px-2">
+          <Link to="/approvals">View all</Link>
+        </Button>
+      </div>
+      <div className="mt-4 overflow-hidden rounded border border-border">
+        <table className="min-w-full divide-y divide-border text-sm">
+          <tbody className="divide-y divide-border bg-surface">
+            {claims.map((claim) => (
+              <tr key={claim.id} className="hover:bg-muted">
+                <td className="px-4 py-3">
+                  <Link to={`/approvals/${claim.id}`} className="font-medium text-ink hover:text-accent">
+                    {claim.title}
+                  </Link>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {claim.employeeName} - {claim.categoryName} - {claim.transactionDate}
+                  </p>
                 </td>
                 <td className="px-4 py-3 text-right font-medium">{formatCurrency(claim.amount)}</td>
                 <td className="px-4 py-3 text-right">

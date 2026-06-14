@@ -3,6 +3,7 @@ package com.claimdesk.controller;
 import com.claimdesk.dto.AdminDashboardResponse;
 import com.claimdesk.dto.DashboardSummaryResponse;
 import com.claimdesk.dto.EmployeeDashboardResponse;
+import com.claimdesk.dto.ManagerDashboardResponse;
 import com.claimdesk.service.DashboardService;
 import java.security.Principal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,5 +33,10 @@ public class DashboardController {
     @GetMapping("/admin")
     public AdminDashboardResponse getAdminDashboard(Principal principal) {
         return dashboardService.getAdminDashboard(principal.getName());
+    }
+
+    @GetMapping("/manager")
+    public ManagerDashboardResponse getManagerDashboard(Principal principal) {
+        return dashboardService.getManagerDashboard(principal.getName());
     }
 }

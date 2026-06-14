@@ -8,6 +8,9 @@ import com.claimdesk.dto.DashboardSummaryResponse;
 import com.claimdesk.dto.EmployeeDashboardResponse;
 import com.claimdesk.dto.EmployeeDashboardSummaryResponse;
 import com.claimdesk.dto.EmployeeRecentClaimResponse;
+import com.claimdesk.dto.ManagerDashboardResponse;
+import com.claimdesk.dto.ManagerDashboardSummaryResponse;
+import com.claimdesk.dto.ManagerRecentClaimResponse;
 import com.claimdesk.entity.AuditLog;
 import com.claimdesk.entity.ClaimStatus;
 import com.claimdesk.entity.ExpenseClaim;
@@ -135,6 +138,35 @@ public class DashboardService {
                 adminDepartmentBreakdown(),
                 adminCategoryBreakdown(),
                 recentAuditLogs()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public ManagerDashboardResponse getManagerDashboard(String email) {
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        if (user.getRole() != Role.MANAGER) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Manager dashboard is only available for managers");
+        }
+
+        Long managerId = user.getId();
+        ManagerDashboardSummaryResponse summary = new ManagerDashboardSummaryResponse(
+                claimRepository.countManagerClaimsByStatus(managerId, ClaimStatus.SUBMITTED),
+                claimRepository.countManagerClaimsByStatus(managerId, ClaimStatus.MANAGER_APPROVED),
+                claimRepository.countManagerClaimsByStatus(managerId, ClaimStatus.MANAGER_REJECTED),
+                claimRepository.sumManagerClaimsByStatus(managerId, ClaimStatus.SUBMITTED),
+                claimRepository.sumManagerClaimsByStatuses(managerId, List.of(ClaimStatus.MANAGER_APPROVED, ClaimStatus.MANAGER_REJECTED)),
+                claimRepository.countManagerClaims(managerId)
+        );
+
+        return new ManagerDashboardResponse(
+                summary,
+                managerStatusBreakdown(managerId),
+                managerMonthlyTrend(managerId),
+                managerCategoryBreakdown(managerId),
+                managerEmployeeBreakdown(managerId),
+                recentPendingManagerClaims(managerId)
         );
     }
 
@@ -378,6 +410,76 @@ public class DashboardService {
                 auditLog.getMetadata(),
                 auditLog.getCreatedAt()
         );
+    }
+
+    private List<DashboardBreakdownResponse> managerStatusBreakdown(Long managerId) {
+        Map<ClaimStatus, DashboardBreakdownResponse> breakdown = new EnumMap<>(ClaimStatus.class);
+        claimRepository.managerStatusBreakdown(managerId)
+                .forEach(row -> {
+                    ClaimStatus status = (ClaimStatus) row[0];
+                    breakdown.put(status, new DashboardBreakdownResponse(status.name(), (Long) row[1], (BigDecimal) row[2]));
+                });
+
+        return List.of(ClaimStatus.SUBMITTED, ClaimStatus.MANAGER_APPROVED, ClaimStatus.MANAGER_REJECTED,
+                        ClaimStatus.FINANCE_APPROVED, ClaimStatus.PAID, ClaimStatus.CANCELLED, ClaimStatus.DRAFT)
+                .stream()
+                .map(status -> breakdown.getOrDefault(status, new DashboardBreakdownResponse(status.name(), 0L, BigDecimal.ZERO)))
+                .toList();
+    }
+
+    private List<DashboardBreakdownResponse> managerMonthlyTrend(Long managerId) {
+        YearMonth currentMonth = YearMonth.now();
+        YearMonth firstMonth = currentMonth.minusMonths(5);
+        Map<YearMonth, MonthlyTotal> totals = new java.util.LinkedHashMap<>();
+
+        for (int i = 0; i < 6; i++) {
+            totals.put(firstMonth.plusMonths(i), new MonthlyTotal());
+        }
+
+        LocalDate startDate = firstMonth.atDay(1);
+        for (ExpenseClaim claim : claimRepository.findManagerClaimsSince(managerId, startDate)) {
+            YearMonth month = YearMonth.from(claim.getTransactionDate());
+            MonthlyTotal total = totals.get(month);
+            if (total != null) {
+                total.count++;
+                total.amount = total.amount.add(claim.getAmount());
+            }
+        }
+
+        return totals.entrySet()
+                .stream()
+                .map(entry -> new DashboardBreakdownResponse(entry.getKey().toString(), entry.getValue().count, entry.getValue().amount))
+                .toList();
+    }
+
+    private List<DashboardBreakdownResponse> managerCategoryBreakdown(Long managerId) {
+        return claimRepository.managerCategoryBreakdown(managerId)
+                .stream()
+                .map(row -> new DashboardBreakdownResponse((String) row[0], (Long) row[1], (BigDecimal) row[2]))
+                .toList();
+    }
+
+    private List<DashboardBreakdownResponse> managerEmployeeBreakdown(Long managerId) {
+        return claimRepository.managerEmployeeBreakdown(managerId)
+                .stream()
+                .map(row -> new DashboardBreakdownResponse((String) row[0], (Long) row[1], (BigDecimal) row[2]))
+                .toList();
+    }
+
+    private List<ManagerRecentClaimResponse> recentPendingManagerClaims(Long managerId) {
+        return claimRepository.findRecentManagerClaimsByStatus(managerId, ClaimStatus.SUBMITTED, PageRequest.of(0, 5))
+                .stream()
+                .map(claim -> new ManagerRecentClaimResponse(
+                        claim.getId(),
+                        claim.getTitle(),
+                        claim.getAmount(),
+                        claim.getStatus(),
+                        claim.getEmployee().getName(),
+                        claim.getCategory().getName(),
+                        claim.getTransactionDate(),
+                        claim.getSubmittedAt()
+                ))
+                .toList();
     }
 
     private static class MonthlyTotal {

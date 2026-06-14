@@ -29,6 +29,60 @@ public interface ExpenseClaimRepository extends JpaRepository<ExpenseClaim, Long
     @Query("select count(claim) from ExpenseClaim claim join claim.employee employee join employee.department department where department.manager.id = :managerId and claim.status = :status")
     long countManagerClaimsByStatus(Long managerId, ClaimStatus status);
 
+    @Query("select count(claim) from ExpenseClaim claim join claim.employee employee join employee.department department where department.manager.id = :managerId")
+    long countManagerClaims(Long managerId);
+
+    @Query("select coalesce(sum(claim.amount), 0) from ExpenseClaim claim join claim.employee employee join employee.department department where department.manager.id = :managerId and claim.status = :status")
+    BigDecimal sumManagerClaimsByStatus(Long managerId, ClaimStatus status);
+
+    @Query("select coalesce(sum(claim.amount), 0) from ExpenseClaim claim join claim.employee employee join employee.department department where department.manager.id = :managerId and claim.status in :statuses")
+    BigDecimal sumManagerClaimsByStatuses(Long managerId, Collection<ClaimStatus> statuses);
+
+    @Query("""
+            select claim.status, count(claim), coalesce(sum(claim.amount), 0)
+            from ExpenseClaim claim
+            join claim.employee employee
+            join employee.department department
+            where department.manager.id = :managerId
+            group by claim.status
+            """)
+    List<Object[]> managerStatusBreakdown(Long managerId);
+
+    @Query("select claim from ExpenseClaim claim join claim.employee employee join employee.department department where department.manager.id = :managerId and claim.transactionDate >= :date")
+    List<ExpenseClaim> findManagerClaimsSince(Long managerId, LocalDate date);
+
+    @Query("""
+            select claim.category.name, count(claim), coalesce(sum(claim.amount), 0)
+            from ExpenseClaim claim
+            join claim.employee employee
+            join employee.department department
+            where department.manager.id = :managerId
+            group by claim.category.name
+            order by coalesce(sum(claim.amount), 0) desc
+            """)
+    List<Object[]> managerCategoryBreakdown(Long managerId);
+
+    @Query("""
+            select employee.name, count(claim), coalesce(sum(claim.amount), 0)
+            from ExpenseClaim claim
+            join claim.employee employee
+            join employee.department department
+            where department.manager.id = :managerId
+            group by employee.name
+            order by coalesce(sum(claim.amount), 0) desc
+            """)
+    List<Object[]> managerEmployeeBreakdown(Long managerId);
+
+    @Query("""
+            select claim from ExpenseClaim claim
+            join claim.employee employee
+            join employee.department department
+            where department.manager.id = :managerId
+                and claim.status = :status
+            order by claim.submittedAt desc
+            """)
+    List<ExpenseClaim> findRecentManagerClaimsByStatus(Long managerId, ClaimStatus status, Pageable pageable);
+
     @Query("select coalesce(sum(claim.amount), 0) from ExpenseClaim claim where claim.employee.id = :employeeId")
     BigDecimal sumAmountByEmployeeId(Long employeeId);
 
