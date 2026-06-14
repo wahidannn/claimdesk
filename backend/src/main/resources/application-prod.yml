@@ -1,0 +1,48 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}}
+    username: ${DB_USERNAME:}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+springdoc:
+  api-docs:
+    enabled: ${OPENAPI_ENABLED:false}
+  swagger-ui:
+    enabled: ${OPENAPI_ENABLED:false}
+
+app:
+  cors:
+    allowed-origin: ${FRONTEND_ORIGIN}
+  security:
+    jwt:
+      secret: ${JWT_SECRET}
+      expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+    cookie:
+      secure: ${COOKIE_SECURE:true}
+      same-site: ${COOKIE_SAME_SITE:None}
+  storage:
+    provider: ${APP_STORAGE_PROVIDER:supabase}
+    receipts-dir: ${RECEIPTS_DIR:storage/receipts}
+    max-receipt-size-bytes: ${MAX_RECEIPT_SIZE_BYTES:5242880}
+    supabase:
+      url: ${SUPABASE_URL}
+      service-role-key: ${SUPABASE_SERVICE_ROLE_KEY}
+      bucket: ${SUPABASE_STORAGE_BUCKET:receipts}
+      signed-url-ttl-seconds: ${SUPABASE_SIGNED_URL_TTL_SECONDS:300}
+
+logging:
+  level:
+    org.hibernate.SQL: warn

@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: claimdesk-postgres
+    environment:
+      POSTGRES_DB: claimdesk
+      POSTGRES_USER: claimdesk
+      POSTGRES_PASSWORD: claimdesk
+    ports:
+      - "5432:5432"
+    volumes:
+      - claimdesk-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U claimdesk -d claimdesk"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  claimdesk-postgres-data:

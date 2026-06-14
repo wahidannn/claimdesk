@@ -1,0 +1,2 @@
+-- Initial migration for the ClaimDesk foundation.
+-- Domain tables will be added in the next milestones.
