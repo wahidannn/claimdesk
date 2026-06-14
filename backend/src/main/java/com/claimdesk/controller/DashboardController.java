@@ -1,6 +1,7 @@
 package com.claimdesk.controller;
 
 import com.claimdesk.dto.DashboardSummaryResponse;
+import com.claimdesk.dto.EmployeeDashboardResponse;
 import com.claimdesk.service.DashboardService;
 import java.security.Principal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,5 +21,10 @@ public class DashboardController {
     @GetMapping("/summary")
     public DashboardSummaryResponse getSummary(Principal principal) {
         return dashboardService.getSummary(principal.getName());
+    }
+
+    @GetMapping("/employee")
+    public EmployeeDashboardResponse getEmployeeDashboard(Principal principal) {
+        return dashboardService.getEmployeeDashboard(principal.getName());
     }
 }

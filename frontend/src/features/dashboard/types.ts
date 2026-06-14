@@ -1,4 +1,5 @@
 import type { Role } from '../auth/types';
+import type { ClaimStatus } from '../claims/types';
 
 export type DashboardSummary = {
   role: Role;
@@ -16,4 +17,38 @@ export type DashboardSummary = {
   activeUsers: number | null;
   activeDepartments: number | null;
   activeCategories: number | null;
+};
+
+export type DashboardBreakdownItem = {
+  label: string;
+  count: number;
+  amount: number;
+};
+
+export type EmployeeDashboardSummary = {
+  draftClaims: number;
+  submittedClaims: number;
+  rejectedClaims: number;
+  paidClaims: number;
+  totalClaimAmount: number;
+  paidAmount: number;
+  pendingAmount: number;
+};
+
+export type RecentEmployeeClaim = {
+  id: number;
+  title: string;
+  amount: number;
+  status: ClaimStatus;
+  categoryName: string;
+  transactionDate: string;
+  updatedAt: string;
+};
+
+export type EmployeeDashboard = {
+  summary: EmployeeDashboardSummary;
+  statusBreakdown: DashboardBreakdownItem[];
+  monthlyTrend: DashboardBreakdownItem[];
+  categoryBreakdown: DashboardBreakdownItem[];
+  recentClaims: RecentEmployeeClaim[];
 };

@@ -4,6 +4,7 @@ import com.claimdesk.entity.ClaimStatus;
 import com.claimdesk.entity.ExpenseClaim;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.math.BigDecimal;
 import org.springframework.data.domain.Page;
@@ -25,8 +26,37 @@ public interface ExpenseClaimRepository extends JpaRepository<ExpenseClaim, Long
     @Query("select coalesce(sum(claim.amount), 0) from ExpenseClaim claim where claim.employee.id = :employeeId")
     BigDecimal sumAmountByEmployeeId(Long employeeId);
 
+    @Query("select coalesce(sum(claim.amount), 0) from ExpenseClaim claim where claim.employee.id = :employeeId and claim.status = :status")
+    BigDecimal sumAmountByEmployeeIdAndStatus(Long employeeId, ClaimStatus status);
+
+    @Query("select coalesce(sum(claim.amount), 0) from ExpenseClaim claim where claim.employee.id = :employeeId and claim.status not in :statuses")
+    BigDecimal sumAmountByEmployeeIdAndStatusNotIn(Long employeeId, Collection<ClaimStatus> statuses);
+
     @Query("select coalesce(sum(claim.amount), 0) from ExpenseClaim claim where claim.status = :status")
     BigDecimal sumAmountByStatus(ClaimStatus status);
+
+    @Query("""
+            select claim.status, count(claim), coalesce(sum(claim.amount), 0)
+            from ExpenseClaim claim
+            where claim.employee.id = :employeeId
+            group by claim.status
+            """)
+    List<Object[]> employeeStatusBreakdown(Long employeeId);
+
+    @Query("""
+            select claim.category.name, count(claim), coalesce(sum(claim.amount), 0)
+            from ExpenseClaim claim
+            where claim.employee.id = :employeeId
+            group by claim.category.name
+            order by coalesce(sum(claim.amount), 0) desc
+            """)
+    List<Object[]> employeeCategoryBreakdown(Long employeeId);
+
+    @Query("select claim from ExpenseClaim claim where claim.employee.id = :employeeId and claim.transactionDate >= :date")
+    List<ExpenseClaim> findEmployeeClaimsSince(Long employeeId, LocalDate date);
+
+    @Query("select claim from ExpenseClaim claim where claim.employee.id = :employeeId order by claim.updatedAt desc")
+    List<ExpenseClaim> findRecentEmployeeClaims(Long employeeId, Pageable pageable);
 
     @Query("""
             select claim from ExpenseClaim claim
