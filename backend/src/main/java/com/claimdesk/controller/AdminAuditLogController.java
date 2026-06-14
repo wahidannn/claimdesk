@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/admin/audit-logs")
@@ -34,24 +36,24 @@ public class AdminAuditLogController {
     public PagedResponse<AuditLogResponse> listAuditLogs(
             @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "") String actorEmail,
-            @RequestParam(required = false) Role actorRole,
-            @RequestParam(required = false) AuditAction action,
-            @RequestParam(required = false) AuditResourceType resourceType,
-            @RequestParam(required = false) Long resourceId,
-            @RequestParam(required = false) LocalDate dateFrom,
-            @RequestParam(required = false) LocalDate dateTo,
+            @RequestParam(defaultValue = "") String actorRole,
+            @RequestParam(defaultValue = "") String action,
+            @RequestParam(defaultValue = "") String resourceType,
+            @RequestParam(defaultValue = "") String resourceId,
+            @RequestParam(defaultValue = "") String dateFrom,
+            @RequestParam(defaultValue = "") String dateTo,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         return auditLogService.listAuditLogs(
                 search,
                 actorEmail,
-                actorRole,
-                action,
-                resourceType,
-                resourceId,
-                toStartOfDay(dateFrom),
-                toExclusiveEnd(dateTo),
+                parseEnum(actorRole, Role.class, "actorRole"),
+                parseEnum(action, AuditAction.class, "action"),
+                parseEnum(resourceType, AuditResourceType.class, "resourceType"),
+                parseLong(resourceId, "resourceId"),
+                toStartOfDay(parseDate(dateFrom, "dateFrom")),
+                toExclusiveEnd(parseDate(dateTo, "dateTo")),
                 Math.max(page, 0),
                 normalizeSize(size)
         );
@@ -62,23 +64,23 @@ public class AdminAuditLogController {
             Principal principal,
             @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "") String actorEmail,
-            @RequestParam(required = false) Role actorRole,
-            @RequestParam(required = false) AuditAction action,
-            @RequestParam(required = false) AuditResourceType resourceType,
-            @RequestParam(required = false) Long resourceId,
-            @RequestParam(required = false) LocalDate dateFrom,
-            @RequestParam(required = false) LocalDate dateTo
+            @RequestParam(defaultValue = "") String actorRole,
+            @RequestParam(defaultValue = "") String action,
+            @RequestParam(defaultValue = "") String resourceType,
+            @RequestParam(defaultValue = "") String resourceId,
+            @RequestParam(defaultValue = "") String dateFrom,
+            @RequestParam(defaultValue = "") String dateTo
     ) {
         String csv = auditLogService.exportAuditLogs(
                 principal.getName(),
                 search,
                 actorEmail,
-                actorRole,
-                action,
-                resourceType,
-                resourceId,
-                toStartOfDay(dateFrom),
-                toExclusiveEnd(dateTo)
+                parseEnum(actorRole, Role.class, "actorRole"),
+                parseEnum(action, AuditAction.class, "action"),
+                parseEnum(resourceType, AuditResourceType.class, "resourceType"),
+                parseLong(resourceId, "resourceId"),
+                toStartOfDay(parseDate(dateFrom, "dateFrom")),
+                toExclusiveEnd(parseDate(dateTo, "dateTo"))
         );
 
         String filename = "audit-logs-" + LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE) + ".csv";
@@ -98,5 +100,41 @@ public class AdminAuditLogController {
 
     private int normalizeSize(int size) {
         return Math.min(Math.max(size, 1), 100);
+    }
+
+    private <T extends Enum<T>> T parseEnum(String value, Class<T> enumType, String fieldName) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        try {
+            return Enum.valueOf(enumType, value);
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid " + fieldName);
+        }
+    }
+
+    private Long parseLong(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        try {
+            return Long.valueOf(value);
+        } catch (NumberFormatException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid " + fieldName);
+        }
+    }
+
+    private LocalDate parseDate(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        try {
+            return LocalDate.parse(value);
+        } catch (RuntimeException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid " + fieldName);
+        }
     }
 }
