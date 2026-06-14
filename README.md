@@ -11,7 +11,6 @@ claimdesk/
 |-- docker-compose.yml
 |-- .env.example
 |-- README.md
-`-- plan.md
 ```
 
 ## Prasyarat
