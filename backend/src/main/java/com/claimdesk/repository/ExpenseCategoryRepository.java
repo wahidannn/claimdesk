@@ -11,6 +11,8 @@ public interface ExpenseCategoryRepository extends JpaRepository<ExpenseCategory
 
     long countByActiveTrue();
 
+    long countByActiveFalse();
+
     boolean existsByNameIgnoreCase(String name);
 
     boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);

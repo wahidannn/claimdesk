@@ -17,6 +17,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     long countByActiveTrue();
 
+    long countByActiveFalse();
+
+    @Query("""
+            select user.role, count(user)
+            from User user
+            group by user.role
+            """)
+    List<Object[]> roleBreakdown();
+
     boolean existsByEmailIgnoreCase(String email);
 
     boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);

@@ -1,4 +1,5 @@
 import type { Role } from '../auth/types';
+import type { AuditLog } from '../audit-logs/types';
 import type { ClaimStatus } from '../claims/types';
 
 export type DashboardSummary = {
@@ -51,4 +52,27 @@ export type EmployeeDashboard = {
   monthlyTrend: DashboardBreakdownItem[];
   categoryBreakdown: DashboardBreakdownItem[];
   recentClaims: RecentEmployeeClaim[];
+};
+
+export type AdminDashboardSummary = {
+  activeUsers: number;
+  inactiveUsers: number;
+  activeDepartments: number;
+  inactiveDepartments: number;
+  activeCategories: number;
+  inactiveCategories: number;
+  totalClaims: number;
+  totalClaimAmount: number;
+  paidAmount: number;
+  pendingClaims: number;
+};
+
+export type AdminDashboard = {
+  summary: AdminDashboardSummary;
+  userRoleBreakdown: DashboardBreakdownItem[];
+  claimStatusBreakdown: DashboardBreakdownItem[];
+  monthlyClaimTrend: DashboardBreakdownItem[];
+  departmentBreakdown: DashboardBreakdownItem[];
+  categoryBreakdown: DashboardBreakdownItem[];
+  recentAuditLogs: AuditLog[];
 };

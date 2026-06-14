@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, FilePlus2, WalletCards } from 'lucide-react';
+import { ArrowRight, FilePlus2, ShieldCheck, WalletCards } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -19,8 +19,8 @@ import {
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../features/auth/useAuth';
-import { getDashboardSummary, getEmployeeDashboard } from '../features/dashboard/api';
-import type { DashboardBreakdownItem, EmployeeDashboard, RecentEmployeeClaim } from '../features/dashboard/types';
+import { getAdminDashboard, getDashboardSummary, getEmployeeDashboard } from '../features/dashboard/api';
+import type { AdminDashboard, DashboardBreakdownItem, EmployeeDashboard, RecentEmployeeClaim } from '../features/dashboard/types';
 import { formatCurrency } from '../features/claims/currency';
 import type { ClaimStatus } from '../features/claims/types';
 
@@ -29,12 +29,17 @@ export function DashboardPage() {
   const summaryQuery = useQuery({
     queryKey: ['dashboard-summary'],
     queryFn: getDashboardSummary,
-    enabled: user?.role !== 'EMPLOYEE',
+    enabled: user?.role !== 'EMPLOYEE' && user?.role !== 'ADMIN',
   });
   const employeeDashboardQuery = useQuery({
     queryKey: ['employee-dashboard'],
     queryFn: getEmployeeDashboard,
     enabled: user?.role === 'EMPLOYEE',
+  });
+  const adminDashboardQuery = useQuery({
+    queryKey: ['admin-dashboard'],
+    queryFn: getAdminDashboard,
+    enabled: user?.role === 'ADMIN',
   });
   const summary = summaryQuery.data;
 
@@ -65,9 +70,19 @@ export function DashboardPage() {
         />
       )}
 
-      {user.role !== 'EMPLOYEE' && summaryQuery.isLoading && <div className="text-sm text-slate-500">Loading dashboard...</div>}
+      {user.role === 'ADMIN' && (
+        <AdminDashboardView
+          dashboard={adminDashboardQuery.data}
+          isLoading={adminDashboardQuery.isLoading}
+          isError={adminDashboardQuery.isError}
+        />
+      )}
 
-      {user.role !== 'EMPLOYEE' && summary && (
+      {user.role !== 'EMPLOYEE' && user.role !== 'ADMIN' && summaryQuery.isLoading && (
+        <div className="text-sm text-slate-500">Loading dashboard...</div>
+      )}
+
+      {user.role !== 'EMPLOYEE' && user.role !== 'ADMIN' && summary && (
         <>
           {user.role === 'MANAGER' && (
             <section className="grid gap-4 md:grid-cols-3">
@@ -86,13 +101,6 @@ export function DashboardPage() {
             </section>
           )}
 
-          {user.role === 'ADMIN' && (
-            <section className="grid gap-4 md:grid-cols-3">
-              <SummaryCard title="Active Users" value={summary.activeUsers ?? 0} />
-              <SummaryCard title="Active Departments" value={summary.activeDepartments ?? 0} />
-              <SummaryCard title="Active Categories" value={summary.activeCategories ?? 0} />
-            </section>
-          )}
         </>
       )}
     </div>
@@ -208,6 +216,107 @@ function EmployeeDashboardView({
   );
 }
 
+function AdminDashboardView({
+  dashboard,
+  isLoading,
+  isError,
+}: {
+  dashboard: AdminDashboard | undefined;
+  isLoading: boolean;
+  isError: boolean;
+}) {
+  if (isLoading) {
+    return <EmployeeDashboardSkeleton />;
+  }
+
+  if (isError) {
+    return (
+      <section className="rounded border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+        Admin dashboard could not be loaded. Please refresh the page.
+      </section>
+    );
+  }
+
+  if (!dashboard) {
+    return null;
+  }
+
+  const hasClaims = dashboard.claimStatusBreakdown.some((item) => item.count > 0);
+
+  return (
+    <div className="space-y-6">
+      <section className="grid gap-4 lg:grid-cols-[1.35fr_0.95fr]">
+        <article className="rounded border border-border bg-surface p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-slate-500">System claim value</p>
+              <p className="mt-3 text-3xl font-semibold text-ink">{formatCurrency(dashboard.summary.totalClaimAmount)}</p>
+            </div>
+            <div className="flex h-11 w-11 items-center justify-center rounded bg-teal-50 text-teal-700">
+              <ShieldCheck size={22} />
+            </div>
+          </div>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <AmountPanel label="Paid amount" value={dashboard.summary.paidAmount} tone="green" />
+            <AmountPanel label="Pending claims" value={dashboard.summary.pendingClaims} tone="blue" format="number" />
+            <AmountPanel label="Total claims" value={dashboard.summary.totalClaims} tone="slate" format="number" />
+          </div>
+        </article>
+
+        <article className="rounded border border-border bg-surface p-6">
+          <p className="text-sm font-medium text-slate-500">Admin shortcuts</p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <DashboardLink to="/users" label="Manage users" />
+            <DashboardLink to="/departments" label="Departments" />
+            <DashboardLink to="/categories" label="Categories" />
+            <DashboardLink to="/audit-logs" label="Audit logs" />
+          </div>
+        </article>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-5">
+        <SummaryCard title="Active Users" value={dashboard.summary.activeUsers} />
+        <SummaryCard title="Inactive Users" value={dashboard.summary.inactiveUsers} />
+        <SummaryCard title="Departments" value={`${dashboard.summary.activeDepartments} active`} />
+        <SummaryCard title="Categories" value={`${dashboard.summary.activeCategories} active`} />
+        <SummaryCard title="Pending Claims" value={dashboard.summary.pendingClaims} />
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+        <ChartPanel title="User role distribution">
+          <RolePieChart data={dashboard.userRoleBreakdown.filter((item) => item.count > 0)} />
+        </ChartPanel>
+        <ChartPanel title="Monthly claim amount">
+          <MonthlyAmountChart data={dashboard.monthlyClaimTrend} />
+        </ChartPanel>
+      </section>
+
+      {hasClaims ? (
+        <section className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+          <ChartPanel title="Claim status overview">
+            <StatusPieChart data={dashboard.claimStatusBreakdown.filter((item) => item.count > 0)} />
+          </ChartPanel>
+          <ChartPanel title="Department claim value">
+            <CategoryBreakdownChart data={dashboard.departmentBreakdown.slice(0, 6)} />
+          </ChartPanel>
+        </section>
+      ) : (
+        <section className="rounded border border-border bg-surface p-8 text-center">
+          <h2 className="text-lg font-semibold text-ink">No claim data yet</h2>
+          <p className="mt-2 text-sm text-slate-600">Claim charts will appear once employees start submitting expenses.</p>
+        </section>
+      )}
+
+      <section className="grid gap-4 xl:grid-cols-[1fr_1fr]">
+        <ChartPanel title="Category claim value">
+          <CategoryBreakdownChart data={dashboard.categoryBreakdown.slice(0, 6)} />
+        </ChartPanel>
+        <RecentAuditLogs logs={dashboard.recentAuditLogs} />
+      </section>
+    </div>
+  );
+}
+
 function DashboardAction({ role }: { role: string }) {
   if (role === 'EMPLOYEE') {
     return (
@@ -265,15 +374,39 @@ function SummaryCard({ title, value }: { title: string; value: string | number }
   );
 }
 
-function AmountPanel({ label, value, tone }: { label: string; value: number; tone: 'green' | 'amber' }) {
-  const className = tone === 'green'
-    ? 'border-green-200 bg-green-50 text-green-700'
-    : 'border-amber-200 bg-amber-50 text-amber-700';
+function DashboardLink({ to, label }: { to: string; label: string }) {
+  return (
+    <Button asChild className="w-full justify-between" variant="secondary">
+      <Link to={to}>
+        {label}
+        <ArrowRight size={16} />
+      </Link>
+    </Button>
+  );
+}
+
+function AmountPanel({
+  label,
+  value,
+  tone,
+  format = 'currency',
+}: {
+  label: string;
+  value: number;
+  tone: 'green' | 'amber' | 'blue' | 'slate';
+  format?: 'currency' | 'number';
+}) {
+  const className = {
+    green: 'border-green-200 bg-green-50 text-green-700',
+    amber: 'border-amber-200 bg-amber-50 text-amber-700',
+    blue: 'border-blue-200 bg-blue-50 text-blue-700',
+    slate: 'border-slate-200 bg-slate-50 text-slate-700',
+  }[tone];
 
   return (
     <div className={`rounded border p-4 ${className}`}>
       <p className="text-xs font-medium uppercase">{label}</p>
-      <p className="mt-2 text-lg font-semibold">{formatCurrency(value)}</p>
+      <p className="mt-2 text-lg font-semibold">{format === 'currency' ? formatCurrency(value) : value}</p>
     </div>
   );
 }
@@ -294,6 +427,25 @@ function StatusPieChart({ data }: { data: DashboardBreakdownItem[] }) {
         <Pie data={data} dataKey="count" nameKey="label" innerRadius={54} outerRadius={88} paddingAngle={3}>
           {data.map((item) => (
             <Cell key={item.label} fill={statusColor(item.label as ClaimStatus)} />
+          ))}
+        </Pie>
+        <Tooltip formatter={(value, name) => [value, formatStatus(String(name))]} />
+      </PieChart>
+    </ResponsiveContainer>
+  );
+}
+
+function RolePieChart({ data }: { data: DashboardBreakdownItem[] }) {
+  if (data.length === 0) {
+    return <div className="flex h-full items-center justify-center text-sm text-slate-500">No user data yet.</div>;
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <PieChart>
+        <Pie data={data} dataKey="count" nameKey="label" innerRadius={54} outerRadius={88} paddingAngle={3}>
+          {data.map((item) => (
+            <Cell key={item.label} fill={roleColor(item.label)} />
           ))}
         </Pie>
         <Tooltip formatter={(value, name) => [value, formatStatus(String(name))]} />
@@ -358,7 +510,7 @@ function RecentClaimsTable({ claims }: { claims: RecentEmployeeClaim[] }) {
                   <Link to={`/claims/${claim.id}`} className="font-medium text-ink hover:text-accent">
                     {claim.title}
                   </Link>
-                  <p className="mt-1 text-xs text-slate-500">{claim.categoryName} · {claim.transactionDate}</p>
+                  <p className="mt-1 text-xs text-slate-500">{claim.categoryName} - {claim.transactionDate}</p>
                 </td>
                 <td className="px-4 py-3 text-right font-medium">{formatCurrency(claim.amount)}</td>
                 <td className="px-4 py-3 text-right">
@@ -369,6 +521,43 @@ function RecentClaimsTable({ claims }: { claims: RecentEmployeeClaim[] }) {
           </tbody>
         </table>
       </div>
+    </article>
+  );
+}
+
+function RecentAuditLogs({ logs }: { logs: AdminDashboard['recentAuditLogs'] }) {
+  return (
+    <article className="rounded border border-border bg-surface p-5">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold text-ink">Recent audit logs</h2>
+        <Button asChild variant="ghost" className="h-8 px-2">
+          <Link to="/audit-logs">View all</Link>
+        </Button>
+      </div>
+
+      {logs.length === 0 ? (
+        <div className="mt-4 rounded border border-border bg-muted p-6 text-center text-sm text-slate-500">
+          No audit activity yet.
+        </div>
+      ) : (
+        <div className="mt-4 overflow-hidden rounded border border-border">
+          <table className="min-w-full divide-y divide-border text-sm">
+            <tbody className="divide-y divide-border bg-surface">
+              {logs.map((log) => (
+                <tr key={log.id} className="hover:bg-muted">
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-ink">{formatStatus(log.action)}</p>
+                    <p className="mt-1 text-xs text-slate-500">{log.actorEmail ?? 'System'} - {formatDateTime(log.createdAt)}</p>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Badge className="border-slate-200 bg-slate-50 text-slate-700">{formatStatus(log.resourceType)}</Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </article>
   );
 }
@@ -393,6 +582,17 @@ function statusColor(status: ClaimStatus) {
   };
 
   return colors[status];
+}
+
+function roleColor(role: string) {
+  const colors: Record<string, string> = {
+    ADMIN: '#2563eb',
+    EMPLOYEE: '#16a34a',
+    MANAGER: '#d97706',
+    FINANCE: '#dc2626',
+  };
+
+  return colors[role] ?? '#64748b';
 }
 
 function statusBadgeClass(status: ClaimStatus) {
@@ -423,6 +623,13 @@ function compactCurrency(value: number) {
   }
 
   return String(value);
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat('en', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(value));
 }
 
 function dashboardTitle(role: string) {

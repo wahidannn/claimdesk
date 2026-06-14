@@ -10,6 +10,8 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
 
     long countByActiveTrue();
 
+    long countByActiveFalse();
+
     boolean existsByNameIgnoreCase(String name);
 
     boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);

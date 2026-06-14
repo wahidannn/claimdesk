@@ -1,14 +1,19 @@
 package com.claimdesk.service;
 
+import com.claimdesk.dto.AdminDashboardResponse;
+import com.claimdesk.dto.AdminDashboardSummaryResponse;
+import com.claimdesk.dto.AuditLogResponse;
 import com.claimdesk.dto.DashboardBreakdownResponse;
 import com.claimdesk.dto.DashboardSummaryResponse;
 import com.claimdesk.dto.EmployeeDashboardResponse;
 import com.claimdesk.dto.EmployeeDashboardSummaryResponse;
 import com.claimdesk.dto.EmployeeRecentClaimResponse;
+import com.claimdesk.entity.AuditLog;
 import com.claimdesk.entity.ClaimStatus;
 import com.claimdesk.entity.ExpenseClaim;
 import com.claimdesk.entity.Role;
 import com.claimdesk.entity.User;
+import com.claimdesk.repository.AuditLogRepository;
 import com.claimdesk.repository.DepartmentRepository;
 import com.claimdesk.repository.ExpenseCategoryRepository;
 import com.claimdesk.repository.ExpenseClaimRepository;
@@ -32,17 +37,20 @@ public class DashboardService {
     private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
     private final ExpenseCategoryRepository categoryRepository;
+    private final AuditLogRepository auditLogRepository;
 
     public DashboardService(
             ExpenseClaimRepository claimRepository,
             UserRepository userRepository,
             DepartmentRepository departmentRepository,
-            ExpenseCategoryRepository categoryRepository
+            ExpenseCategoryRepository categoryRepository,
+            AuditLogRepository auditLogRepository
     ) {
         this.claimRepository = claimRepository;
         this.userRepository = userRepository;
         this.departmentRepository = departmentRepository;
         this.categoryRepository = categoryRepository;
+        this.auditLogRepository = auditLogRepository;
     }
 
     @Transactional(readOnly = true)
@@ -94,6 +102,39 @@ public class DashboardService {
                 employeeMonthlyTrend(employeeId),
                 employeeCategoryBreakdown(employeeId),
                 employeeRecentClaims(employeeId)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public AdminDashboardResponse getAdminDashboard(String email) {
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        if (user.getRole() != Role.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin dashboard is only available for admins");
+        }
+
+        AdminDashboardSummaryResponse summary = new AdminDashboardSummaryResponse(
+                userRepository.countByActiveTrue(),
+                userRepository.countByActiveFalse(),
+                departmentRepository.countByActiveTrue(),
+                departmentRepository.countByActiveFalse(),
+                categoryRepository.countByActiveTrue(),
+                categoryRepository.countByActiveFalse(),
+                claimRepository.count(),
+                claimRepository.sumAllAmounts(),
+                claimRepository.sumAmountByStatus(ClaimStatus.PAID),
+                claimRepository.countByStatusNotIn(List.of(ClaimStatus.PAID, ClaimStatus.MANAGER_REJECTED, ClaimStatus.CANCELLED))
+        );
+
+        return new AdminDashboardResponse(
+                summary,
+                userRoleBreakdown(),
+                claimStatusBreakdown(),
+                adminMonthlyTrend(),
+                adminDepartmentBreakdown(),
+                adminCategoryBreakdown(),
+                recentAuditLogs()
         );
     }
 
@@ -246,6 +287,97 @@ public class DashboardService {
                         claim.getUpdatedAt()
                 ))
                 .toList();
+    }
+
+    private List<DashboardBreakdownResponse> userRoleBreakdown() {
+        Map<Role, DashboardBreakdownResponse> breakdown = new EnumMap<>(Role.class);
+        userRepository.roleBreakdown()
+                .forEach(row -> {
+                    Role role = (Role) row[0];
+                    breakdown.put(role, new DashboardBreakdownResponse(role.name(), (Long) row[1], BigDecimal.ZERO));
+                });
+
+        return List.of(Role.ADMIN, Role.EMPLOYEE, Role.MANAGER, Role.FINANCE)
+                .stream()
+                .map(role -> breakdown.getOrDefault(role, new DashboardBreakdownResponse(role.name(), 0L, BigDecimal.ZERO)))
+                .toList();
+    }
+
+    private List<DashboardBreakdownResponse> claimStatusBreakdown() {
+        Map<ClaimStatus, DashboardBreakdownResponse> breakdown = new EnumMap<>(ClaimStatus.class);
+        claimRepository.statusBreakdown()
+                .forEach(row -> {
+                    ClaimStatus status = (ClaimStatus) row[0];
+                    breakdown.put(status, new DashboardBreakdownResponse(status.name(), (Long) row[1], (BigDecimal) row[2]));
+                });
+
+        return List.of(ClaimStatus.DRAFT, ClaimStatus.SUBMITTED, ClaimStatus.MANAGER_APPROVED,
+                        ClaimStatus.MANAGER_REJECTED, ClaimStatus.FINANCE_APPROVED, ClaimStatus.PAID,
+                        ClaimStatus.CANCELLED)
+                .stream()
+                .map(status -> breakdown.getOrDefault(status, new DashboardBreakdownResponse(status.name(), 0L, BigDecimal.ZERO)))
+                .toList();
+    }
+
+    private List<DashboardBreakdownResponse> adminMonthlyTrend() {
+        YearMonth currentMonth = YearMonth.now();
+        YearMonth firstMonth = currentMonth.minusMonths(5);
+        Map<YearMonth, MonthlyTotal> totals = new java.util.LinkedHashMap<>();
+
+        for (int i = 0; i < 6; i++) {
+            totals.put(firstMonth.plusMonths(i), new MonthlyTotal());
+        }
+
+        LocalDate startDate = firstMonth.atDay(1);
+        for (ExpenseClaim claim : claimRepository.findClaimsSince(startDate)) {
+            YearMonth month = YearMonth.from(claim.getTransactionDate());
+            MonthlyTotal total = totals.get(month);
+            if (total != null) {
+                total.count++;
+                total.amount = total.amount.add(claim.getAmount());
+            }
+        }
+
+        return totals.entrySet()
+                .stream()
+                .map(entry -> new DashboardBreakdownResponse(entry.getKey().toString(), entry.getValue().count, entry.getValue().amount))
+                .toList();
+    }
+
+    private List<DashboardBreakdownResponse> adminDepartmentBreakdown() {
+        return claimRepository.departmentBreakdown()
+                .stream()
+                .map(row -> new DashboardBreakdownResponse((String) row[0], (Long) row[1], (BigDecimal) row[2]))
+                .toList();
+    }
+
+    private List<DashboardBreakdownResponse> adminCategoryBreakdown() {
+        return claimRepository.categoryBreakdown()
+                .stream()
+                .map(row -> new DashboardBreakdownResponse((String) row[0], (Long) row[1], (BigDecimal) row[2]))
+                .toList();
+    }
+
+    private List<AuditLogResponse> recentAuditLogs() {
+        return auditLogRepository.findRecent(PageRequest.of(0, 5))
+                .stream()
+                .map(this::toAuditLogResponse)
+                .toList();
+    }
+
+    private AuditLogResponse toAuditLogResponse(AuditLog auditLog) {
+        return new AuditLogResponse(
+                auditLog.getId(),
+                auditLog.getActorId(),
+                auditLog.getActorEmail(),
+                auditLog.getActorRole(),
+                auditLog.getAction(),
+                auditLog.getResourceType(),
+                auditLog.getResourceId(),
+                auditLog.getDescription(),
+                auditLog.getMetadata(),
+                auditLog.getCreatedAt()
+        );
     }
 
     private static class MonthlyTotal {

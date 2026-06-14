@@ -1,5 +1,6 @@
 package com.claimdesk.controller;
 
+import com.claimdesk.dto.AdminDashboardResponse;
 import com.claimdesk.dto.DashboardSummaryResponse;
 import com.claimdesk.dto.EmployeeDashboardResponse;
 import com.claimdesk.service.DashboardService;
@@ -26,5 +27,10 @@ public class DashboardController {
     @GetMapping("/employee")
     public EmployeeDashboardResponse getEmployeeDashboard(Principal principal) {
         return dashboardService.getEmployeeDashboard(principal.getName());
+    }
+
+    @GetMapping("/admin")
+    public AdminDashboardResponse getAdminDashboard(Principal principal) {
+        return dashboardService.getAdminDashboard(principal.getName());
     }
 }

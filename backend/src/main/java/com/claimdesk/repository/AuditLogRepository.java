@@ -37,4 +37,7 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
             OffsetDateTime dateTo,
             Pageable pageable
     );
+
+    @Query("select auditLog from AuditLog auditLog order by auditLog.createdAt desc")
+    java.util.List<AuditLog> findRecent(Pageable pageable);
 }

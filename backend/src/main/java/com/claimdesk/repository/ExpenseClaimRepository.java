@@ -20,6 +20,12 @@ public interface ExpenseClaimRepository extends JpaRepository<ExpenseClaim, Long
 
     long countByStatus(ClaimStatus status);
 
+    @Query("select coalesce(sum(claim.amount), 0) from ExpenseClaim claim")
+    BigDecimal sumAllAmounts();
+
+    @Query("select count(claim) from ExpenseClaim claim where claim.status not in :statuses")
+    long countByStatusNotIn(Collection<ClaimStatus> statuses);
+
     @Query("select count(claim) from ExpenseClaim claim join claim.employee employee join employee.department department where department.manager.id = :managerId and claim.status = :status")
     long countManagerClaimsByStatus(Long managerId, ClaimStatus status);
 
@@ -34,6 +40,34 @@ public interface ExpenseClaimRepository extends JpaRepository<ExpenseClaim, Long
 
     @Query("select coalesce(sum(claim.amount), 0) from ExpenseClaim claim where claim.status = :status")
     BigDecimal sumAmountByStatus(ClaimStatus status);
+
+    @Query("""
+            select claim.status, count(claim), coalesce(sum(claim.amount), 0)
+            from ExpenseClaim claim
+            group by claim.status
+            """)
+    List<Object[]> statusBreakdown();
+
+    @Query("select claim from ExpenseClaim claim where claim.transactionDate >= :date")
+    List<ExpenseClaim> findClaimsSince(LocalDate date);
+
+    @Query("""
+            select coalesce(department.name, 'Unassigned'), count(claim), coalesce(sum(claim.amount), 0)
+            from ExpenseClaim claim
+            join claim.employee employee
+            left join employee.department department
+            group by department.name
+            order by coalesce(sum(claim.amount), 0) desc
+            """)
+    List<Object[]> departmentBreakdown();
+
+    @Query("""
+            select claim.category.name, count(claim), coalesce(sum(claim.amount), 0)
+            from ExpenseClaim claim
+            group by claim.category.name
+            order by coalesce(sum(claim.amount), 0) desc
+            """)
+    List<Object[]> categoryBreakdown();
 
     @Query("""
             select claim.status, count(claim), coalesce(sum(claim.amount), 0)
