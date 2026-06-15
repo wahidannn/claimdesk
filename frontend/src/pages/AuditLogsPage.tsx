@@ -162,7 +162,7 @@ export function AuditLogsPage() {
         </Button>
       </form>
 
-      <div className="rounded border border-border bg-surface">
+      <div className="overflow-hidden rounded-lg border border-border bg-surface shadow-card">
         <Table>
           <thead>
             <tr>

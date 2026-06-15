@@ -106,14 +106,14 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-muted text-ink">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-border bg-surface px-4 py-5 md:block">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-border bg-sidebar px-4 py-5 md:block">
         <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded bg-accent text-white">
-            <ReceiptText size={20} />
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-accentSoft text-accent">
+            <ReceiptText size={19} />
           </div>
           <div>
-            <p className="text-sm font-semibold uppercase text-slate-500">ClaimDesk</p>
-            <h1 className="text-lg font-semibold">Expense Approval</h1>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-mutedText">ClaimDesk</p>
+            <h1 className="text-base font-bold text-ink">Expense Approval</h1>
           </div>
         </div>
         <nav className="space-y-1">
@@ -123,8 +123,8 @@ export function AppLayout() {
               to={item.to}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 rounded px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-muted hover:text-ink',
-                  isActive && 'bg-blue-50 text-accent',
+                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-mutedText transition hover:bg-white/70 hover:text-ink',
+                  isActive && 'bg-accentSoft text-accent shadow-sm',
                 )
               }
             >
@@ -141,23 +141,23 @@ export function AppLayout() {
       </aside>
 
       <div className="md:pl-64">
-        <header className="sticky top-0 z-10 border-b border-border bg-surface px-4 py-4 md:px-8">
+        <header className="sticky top-0 z-10 border-b border-border/70 bg-muted/95 px-4 py-4 backdrop-blur md:px-7">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm text-slate-500">{roleLabels[user.role]}</p>
-              <h2 className="text-xl font-semibold">{user.name}</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-mutedText">{roleLabels[user.role]}</p>
+              <h2 className="text-lg font-bold text-ink">{user.name}</h2>
             </div>
             <div className="flex items-center gap-3">
               <div className="group relative">
                 <Button type="button" variant="secondary" className="relative px-3" aria-label="Notifications">
                   <Bell size={16} />
                   {unreadCount > 0 && (
-                    <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-semibold text-white">
+                    <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-semibold text-white">
                       {unreadCount}
                     </span>
                   )}
                 </Button>
-                <div className="invisible absolute right-0 top-11 z-20 w-80 rounded border border-border bg-surface shadow-xl opacity-0 transition group-hover:visible group-hover:opacity-100">
+                <div className="invisible absolute right-0 top-11 z-20 w-80 rounded-lg border border-border bg-surface shadow-dropdown opacity-0 transition group-hover:visible group-hover:opacity-100">
                   <div className="flex items-center justify-between border-b border-border px-4 py-3">
                     <h3 className="text-sm font-semibold">Notifications</h3>
                     <Button
@@ -177,7 +177,7 @@ export function AppLayout() {
                         type="button"
                         className={cn(
                           'block w-full border-b border-border px-4 py-3 text-left transition hover:bg-muted',
-                          !notification.read && 'bg-blue-50/70',
+                          !notification.read && 'bg-accentSoft/70',
                         )}
                         onClick={() => void handleNotificationClick(notification)}
                       >
@@ -185,17 +185,17 @@ export function AppLayout() {
                           <p className="text-sm font-semibold text-ink">{notification.title}</p>
                           {!notification.read && <span className="mt-1 h-2 w-2 rounded-full bg-accent" />}
                         </div>
-                        <p className="mt-1 text-sm leading-5 text-slate-600">{notification.message}</p>
-                        <p className="mt-2 text-xs text-slate-400">{notification.createdAt}</p>
+                        <p className="mt-1 text-sm leading-5 text-mutedText">{notification.message}</p>
+                        <p className="mt-2 text-xs text-mutedText/70">{notification.createdAt}</p>
                       </button>
                     ))}
                     {!notificationsQuery.isLoading && (notificationsQuery.data?.items ?? []).length === 0 && (
-                      <div className="px-4 py-6 text-center text-sm text-slate-500">No notifications.</div>
+                      <div className="px-4 py-6 text-center text-sm text-mutedText">No notifications.</div>
                     )}
                   </div>
                 </div>
               </div>
-              <span className="hidden rounded border border-border px-3 py-1 text-sm text-slate-600 sm:inline-flex">
+              <span className="hidden rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-mutedText sm:inline-flex">
                 {user.email}
               </span>
               <Button type="button" variant="secondary" onClick={handleLogout}>
@@ -205,7 +205,7 @@ export function AppLayout() {
             </div>
           </div>
         </header>
-        <main className="px-4 py-6 md:px-8">
+        <main className="px-4 py-5 md:px-7">
           <Outlet />
         </main>
       </div>

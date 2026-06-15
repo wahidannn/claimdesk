@@ -128,7 +128,7 @@ export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
         </div>
       </div>
 
-      <section className="grid gap-4 rounded border border-border bg-surface p-5 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="grid gap-4 rounded-lg border border-border bg-surface p-5 shadow-card sm:grid-cols-2 lg:grid-cols-3">
         <DetailItem label="Amount" value={formatCurrency(claim.amount)} />
         <DetailItem label="Category" value={claim.category.name} />
         <DetailItem label="Transaction Date" value={claim.transactionDate} />
@@ -143,7 +143,7 @@ export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
         </div>
       </section>
 
-      <section className="space-y-4 rounded border border-border bg-surface p-5">
+      <section className="space-y-4 rounded-lg border border-border bg-surface p-5 shadow-card">
         <div>
           <h2 className="text-lg font-semibold">Receipts</h2>
           <p className="mt-1 text-sm text-slate-500">Receipt yang diupload employee untuk claim ini.</p>
@@ -159,7 +159,7 @@ export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
           {claim.attachments.map((attachment) => (
             <div
               key={attachment.id}
-              className="flex flex-col gap-3 rounded border border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-3 rounded-md border border-border px-4 py-3 transition hover:bg-accentSoft/40 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex min-w-0 items-center gap-3">
                 <FileText className="shrink-0 text-slate-500" size={20} />
@@ -188,14 +188,14 @@ export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
         </div>
       </section>
 
-      <section className="space-y-4 rounded border border-border bg-surface p-5">
+      <section className="space-y-4 rounded-lg border border-border bg-surface p-5 shadow-card">
         <div>
           <h2 className="text-lg font-semibold">Approval History</h2>
           <p className="mt-1 text-sm text-slate-500">Catatan keputusan approval untuk claim ini.</p>
         </div>
         <div className="space-y-3">
           {claim.approvalNotes.map((approvalNote) => (
-            <div key={approvalNote.id} className="rounded border border-border px-4 py-3">
+            <div key={approvalNote.id} className="rounded-md border border-border px-4 py-3">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <div className="font-medium">{approvalNote.action.split('_').join(' ')}</div>
                 <div className="text-sm text-slate-500">{approvalNote.createdAt}</div>

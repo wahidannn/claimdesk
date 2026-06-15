@@ -15,8 +15,8 @@ export function Modal({ open, title, children, onClose }: ModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-      <div className="w-full max-w-lg rounded border border-border bg-surface shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/35 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-lg border border-border bg-surface shadow-dropdown">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 className="font-semibold">{title}</h2>
           <Button type="button" variant="ghost" onClick={onClose} aria-label="Close modal">

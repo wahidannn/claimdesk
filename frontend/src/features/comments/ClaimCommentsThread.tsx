@@ -38,7 +38,7 @@ export function ClaimCommentsThread({ claimId }: { claimId: number }) {
   const comments = commentsQuery.data ?? [];
 
   return (
-    <section className="space-y-4 rounded border border-border bg-surface p-5">
+    <section className="space-y-4 rounded-lg border border-border bg-surface p-5 shadow-card">
       <div>
         <h2 className="text-lg font-semibold">Comments</h2>
         <p className="mt-1 text-sm text-slate-500">Diskusi internal untuk claim ini.</p>
@@ -54,7 +54,7 @@ export function ClaimCommentsThread({ claimId }: { claimId: number }) {
         )}
 
         {comments.map((comment) => (
-          <article key={comment.id} className="rounded border border-border px-4 py-3">
+          <article key={comment.id} className="rounded-md border border-border px-4 py-3 transition hover:bg-accentSoft/40">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -112,5 +112,5 @@ function roleBadgeClass(role: string) {
     return 'border-amber-200 bg-amber-50 text-amber-700';
   }
 
-  return 'border-blue-200 bg-blue-50 text-blue-700';
+  return 'border-sky-200 bg-sky-50 text-sky-700';
 }

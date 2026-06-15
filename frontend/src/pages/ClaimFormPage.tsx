@@ -108,7 +108,7 @@ export function ClaimFormPage() {
         <p className="mt-1 text-sm text-slate-500">Simpan claim sebagai draft sebelum disubmit ke manager.</p>
       </div>
 
-      <form className="space-y-5 rounded border border-border bg-surface p-5" onSubmit={handleSubmit(onSubmit)}>
+      <form className="space-y-5 rounded-lg border border-border bg-surface p-5 shadow-card" onSubmit={handleSubmit(onSubmit)}>
         <div>
           <label className="text-sm font-medium" htmlFor="title">
             Title

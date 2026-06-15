@@ -159,7 +159,7 @@ export function ClaimDetailPage() {
         </section>
       )}
 
-      <section className="grid gap-4 rounded border border-border bg-surface p-5 sm:grid-cols-2">
+      <section className="grid gap-4 rounded-lg border border-border bg-surface p-5 shadow-card sm:grid-cols-2">
         <DetailItem label="Amount" value={formatCurrency(claim.amount)} />
         <DetailItem label="Transaction Date" value={claim.transactionDate} />
         <DetailItem label="Submitted At" value={claim.submittedAt ?? '-'} />
@@ -169,14 +169,14 @@ export function ClaimDetailPage() {
         </div>
       </section>
 
-      <section className="space-y-4 rounded border border-border bg-surface p-5">
+      <section className="space-y-4 rounded-lg border border-border bg-surface p-5 shadow-card">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold">Receipts</h2>
             <p className="mt-1 text-sm text-slate-500">Upload JPG, PNG, atau PDF maksimal 5 MB untuk draft atau revision claim.</p>
           </div>
           {canManageReceipts && (
-            <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded bg-accent px-4 text-sm font-medium text-white transition hover:bg-blue-700">
+            <label className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-md bg-accent px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#067A57]">
               <Upload size={16} />
               Upload Receipt
               <input
@@ -200,7 +200,7 @@ export function ClaimDetailPage() {
           {(attachmentsQuery.data ?? []).map((attachment) => (
             <div
               key={attachment.id}
-              className="flex flex-col gap-3 rounded border border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-3 rounded-md border border-border px-4 py-3 transition hover:bg-accentSoft/40 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex min-w-0 items-center gap-3">
                 <FileText className="shrink-0 text-slate-500" size={20} />

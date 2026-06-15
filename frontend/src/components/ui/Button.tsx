@@ -15,10 +15,10 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 export function Button({ asChild = false, className, variant = 'primary', children, ...props }: ButtonProps) {
   const buttonClassName = cn(
-    'inline-flex h-10 items-center justify-center gap-2 rounded px-4 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-    variant === 'primary' && 'bg-accent text-white hover:bg-blue-700',
-    variant === 'secondary' && 'border border-border bg-surface text-ink hover:bg-muted',
-    variant === 'ghost' && 'text-slate-600 hover:bg-muted hover:text-ink',
+    'inline-flex h-9 items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-accent/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+    variant === 'primary' && 'bg-accent text-white shadow-sm hover:bg-[#067A57]',
+    variant === 'secondary' && 'border border-border bg-surface text-ink hover:border-accent/30 hover:bg-accentSoft',
+    variant === 'ghost' && 'text-mutedText hover:bg-accentSoft hover:text-accent',
     className,
   );
 

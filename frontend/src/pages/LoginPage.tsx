@@ -53,13 +53,13 @@ export function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-muted px-4 py-10 text-ink">
-      <section className="w-full max-w-md rounded border border-border bg-surface p-6 shadow-sm">
+      <section className="w-full max-w-md rounded-lg border border-border bg-surface p-6 shadow-card">
         <div className="mb-8 flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded bg-accent text-white">
             <ReceiptText size={22} />
           </div>
           <div>
-            <p className="text-sm font-semibold uppercase text-slate-500">ClaimDesk</p>
+            <p className="text-sm font-semibold uppercase text-mutedText">ClaimDesk</p>
             <h1 className="text-xl font-semibold">Login</h1>
           </div>
         </div>
@@ -98,7 +98,7 @@ export function LoginPage() {
           </Button>
         </form>
 
-        <div className="mt-6 rounded border border-border bg-muted p-3 text-sm text-slate-600">
+        <div className="mt-6 rounded-md border border-border bg-sidebar p-3 text-sm text-mutedText">
           Demo: admin@example.com / password123
         </div>
       </section>

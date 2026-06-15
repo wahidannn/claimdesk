@@ -117,7 +117,7 @@ export function ReportsPage() {
       </div>
 
       {notice && (
-        <div className="rounded border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-accent">{notice}</div>
+        <div className="rounded-md border border-accent/20 bg-accentSoft px-4 py-3 text-sm font-medium text-accent">{notice}</div>
       )}
 
       {summary && (
@@ -197,7 +197,7 @@ export function ReportsPage() {
         <Breakdown title="By Department" items={summary?.byDepartment ?? []} />
       </section>
 
-      <div className="rounded border border-border bg-surface">
+      <div className="overflow-hidden rounded-lg border border-border bg-surface shadow-card">
         <Table>
           <thead>
             <tr>
@@ -261,7 +261,7 @@ export function ReportsPage() {
       </div>
 
       {user?.role === 'ADMIN' && (
-        <section className="rounded border border-border bg-surface p-5">
+        <section className="rounded-lg border border-border bg-surface p-5 shadow-card">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h2 className="text-lg font-semibold">Audit Log Export</h2>
@@ -292,28 +292,28 @@ export function ReportsPage() {
 
 function SummaryCard({ title, value }: { title: string; value: string | number }) {
   return (
-    <article className="rounded border border-border bg-surface p-5">
-      <p className="text-sm font-medium text-slate-500">{title}</p>
-      <p className="mt-3 text-2xl font-semibold text-ink">{value}</p>
+    <article className="rounded-lg border border-border bg-surface p-4 shadow-card">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-mutedText">{title}</p>
+      <p className="mt-3 text-2xl font-bold tracking-tight text-ink">{value}</p>
     </article>
   );
 }
 
 function Breakdown({ title, items }: { title: string; items: Array<{ label: string; count: number; amount: number }> }) {
   return (
-    <article className="rounded border border-border bg-surface p-5">
-      <h2 className="font-semibold">{title}</h2>
+    <article className="rounded-lg border border-border bg-surface p-5 shadow-card">
+      <h2 className="text-sm font-bold text-ink">{title}</h2>
       <div className="mt-4 space-y-3">
         {items.slice(0, 5).map((item) => (
-          <div key={item.label} className="flex items-center justify-between gap-3 text-sm">
+          <div key={item.label} className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2 text-sm">
             <div className="min-w-0">
-              <p className="truncate font-medium">{item.label}</p>
-              <p className="text-slate-500">{item.count} claims</p>
+              <p className="truncate font-semibold text-ink">{item.label}</p>
+              <p className="text-mutedText">{item.count} claims</p>
             </div>
             <Badge>{formatCurrency(item.amount)}</Badge>
           </div>
         ))}
-        {items.length === 0 && <p className="text-sm text-slate-500">No data.</p>}
+        {items.length === 0 && <p className="text-sm text-mutedText">No data.</p>}
       </div>
     </article>
   );

@@ -5,11 +5,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        border: '#d9e2ec',
+        border: '#E6EAE8',
         surface: '#ffffff',
-        muted: '#f4f7fb',
-        ink: '#18212f',
-        accent: '#2563eb',
+        muted: '#F7F8FA',
+        sidebar: '#F3F6F5',
+        ink: '#17352E',
+        mutedText: '#7C8A86',
+        accent: '#079669',
+        accentSoft: '#E8F6EF',
+      },
+      boxShadow: {
+        card: '0 10px 30px rgba(23, 53, 46, 0.045)',
+        dropdown: '0 18px 44px rgba(23, 53, 46, 0.12)',
       },
     },
   },

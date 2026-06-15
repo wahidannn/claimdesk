@@ -11,14 +11,14 @@ export function Toast({ title, description, variant = 'info' }: ToastProps) {
   return (
     <div
       className={cn(
-        'rounded border bg-surface p-4 shadow-sm',
-        variant === 'success' && 'border-green-200',
-        variant === 'error' && 'border-red-200',
-        variant === 'info' && 'border-border',
+        'rounded-lg border bg-surface p-4 shadow-card',
+        variant === 'success' && 'border-emerald-200 bg-emerald-50 text-emerald-800',
+        variant === 'error' && 'border-red-200 bg-red-50 text-red-800',
+        variant === 'info' && 'border-border text-ink',
       )}
     >
       <p className="text-sm font-semibold">{title}</p>
-      {description && <div className="mt-1 text-sm text-slate-600">{description}</div>}
+      {description && <div className="mt-1 text-sm text-mutedText">{description}</div>}
     </div>
   );
 }

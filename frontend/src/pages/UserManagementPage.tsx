@@ -159,7 +159,7 @@ export function UserManagementPage() {
       </div>
 
       {notice && (
-        <div className="rounded border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-accent">{notice}</div>
+        <div className="rounded-md border border-accent/20 bg-accentSoft px-4 py-3 text-sm font-medium text-accent">{notice}</div>
       )}
 
       <form className="flex flex-col gap-3 sm:flex-row" onSubmit={handleSearch}>
@@ -177,7 +177,7 @@ export function UserManagementPage() {
         </Button>
       </form>
 
-      <div className="rounded border border-border bg-surface">
+      <div className="overflow-hidden rounded-lg border border-border bg-surface shadow-card">
         <Table>
           <thead>
             <tr>
@@ -192,8 +192,15 @@ export function UserManagementPage() {
             {users.map((user) => (
               <tr key={user.id}>
                 <Td>
-                  <div className="font-medium">{user.name}</div>
-                  <div className="text-sm text-slate-500">{user.email}</div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accentSoft text-xs font-bold text-accent">
+                      {user.name.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="font-semibold">{user.name}</div>
+                      <div className="text-sm text-mutedText">{user.email}</div>
+                    </div>
+                  </div>
                 </Td>
                 <Td>{user.role}</Td>
                 <Td>{user.department?.name ?? '-'}</Td>

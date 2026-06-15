@@ -124,7 +124,7 @@ export function CategoryManagementPage() {
       </div>
 
       {notice && (
-        <div className="rounded border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-accent">{notice}</div>
+        <div className="rounded-md border border-accent/20 bg-accentSoft px-4 py-3 text-sm font-medium text-accent">{notice}</div>
       )}
 
       <form className="flex flex-col gap-3 sm:flex-row" onSubmit={handleSearch}>
@@ -142,7 +142,7 @@ export function CategoryManagementPage() {
         </Button>
       </form>
 
-      <div className="rounded border border-border bg-surface">
+      <div className="overflow-hidden rounded-lg border border-border bg-surface shadow-card">
         <Table>
           <thead>
             <tr>

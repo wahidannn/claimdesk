@@ -62,12 +62,12 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded border border-border bg-surface p-6">
+      <section className="rounded-lg border border-border bg-surface p-5 shadow-card">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <Badge>Dashboard</Badge>
-            <h1 className="mt-3 text-2xl font-semibold">{dashboardTitle(user.role)}</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+            <h1 className="mt-3 text-2xl font-bold tracking-tight">{dashboardTitle(user.role)}</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-mutedText">
               Ringkasan aktivitas ClaimDesk yang paling relevan untuk role kamu.
             </p>
           </div>
@@ -125,7 +125,7 @@ function EmployeeDashboardView({
 
   if (isError) {
     return (
-      <section className="rounded border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+      <section className="rounded-lg border border-red-200 bg-red-50 p-5 text-sm font-medium text-red-700">
         Employee dashboard could not be loaded. Please refresh the page.
       </section>
     );
@@ -139,12 +139,12 @@ function EmployeeDashboardView({
 
   if (!hasClaims) {
     return (
-      <section className="rounded border border-border bg-surface p-8 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded bg-blue-50 text-accent">
+      <section className="rounded-lg border border-border bg-surface p-8 text-center shadow-card">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-accentSoft text-accent">
           <FilePlus2 size={22} />
         </div>
         <h2 className="mt-4 text-lg font-semibold text-ink">No claims yet</h2>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-mutedText">
           Start by creating your first expense claim. Your activity, status breakdown, and recent claims will appear here.
         </p>
         <Button asChild className="mt-5">
@@ -157,13 +157,13 @@ function EmployeeDashboardView({
   return (
     <div className="space-y-6">
       <section className="grid gap-4 lg:grid-cols-[1.4fr_0.9fr]">
-        <article className="rounded border border-border bg-surface p-6">
+        <article className="rounded-lg border border-border bg-surface p-5 shadow-card">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">Total submitted value</p>
-              <p className="mt-3 text-3xl font-semibold text-ink">{formatCurrency(dashboard.summary.totalClaimAmount)}</p>
+              <p className="text-sm font-semibold text-mutedText">Total submitted value</p>
+              <p className="mt-3 text-3xl font-bold tracking-tight text-ink">{formatCurrency(dashboard.summary.totalClaimAmount)}</p>
             </div>
-            <div className="flex h-11 w-11 items-center justify-center rounded bg-blue-50 text-accent">
+            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-accentSoft text-accent">
               <WalletCards size={22} />
             </div>
           </div>
@@ -173,8 +173,8 @@ function EmployeeDashboardView({
           </div>
         </article>
 
-        <article className="rounded border border-border bg-surface p-6">
-          <p className="text-sm font-medium text-slate-500">Quick actions</p>
+        <article className="rounded-lg border border-border bg-surface p-5 shadow-card">
+          <p className="text-sm font-semibold text-mutedText">Quick actions</p>
           <div className="mt-5 space-y-3">
             <Button asChild className="w-full justify-between">
               <Link to="/claims/new">
@@ -234,7 +234,7 @@ function AdminDashboardView({
 
   if (isError) {
     return (
-      <section className="rounded border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+      <section className="rounded-lg border border-red-200 bg-red-50 p-5 text-sm font-medium text-red-700">
         Admin dashboard could not be loaded. Please refresh the page.
       </section>
     );
@@ -249,13 +249,13 @@ function AdminDashboardView({
   return (
     <div className="space-y-6">
       <section className="grid gap-4 lg:grid-cols-[1.35fr_0.95fr]">
-        <article className="rounded border border-border bg-surface p-6">
+        <article className="rounded-lg border border-border bg-surface p-5 shadow-card">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">System claim value</p>
-              <p className="mt-3 text-3xl font-semibold text-ink">{formatCurrency(dashboard.summary.totalClaimAmount)}</p>
+              <p className="text-sm font-semibold text-mutedText">System claim value</p>
+              <p className="mt-3 text-3xl font-bold tracking-tight text-ink">{formatCurrency(dashboard.summary.totalClaimAmount)}</p>
             </div>
-            <div className="flex h-11 w-11 items-center justify-center rounded bg-teal-50 text-teal-700">
+            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-teal-50 text-teal-700">
               <ShieldCheck size={22} />
             </div>
           </div>
@@ -266,8 +266,8 @@ function AdminDashboardView({
           </div>
         </article>
 
-        <article className="rounded border border-border bg-surface p-6">
-          <p className="text-sm font-medium text-slate-500">Admin shortcuts</p>
+        <article className="rounded-lg border border-border bg-surface p-5 shadow-card">
+          <p className="text-sm font-semibold text-mutedText">Admin shortcuts</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <DashboardLink to="/users" label="Manage users" />
             <DashboardLink to="/departments" label="Departments" />
@@ -304,9 +304,9 @@ function AdminDashboardView({
           </ChartPanel>
         </section>
       ) : (
-        <section className="rounded border border-border bg-surface p-8 text-center">
+        <section className="rounded-lg border border-border bg-surface p-8 text-center shadow-card">
           <h2 className="text-lg font-semibold text-ink">No claim data yet</h2>
-          <p className="mt-2 text-sm text-slate-600">Claim charts will appear once employees start submitting expenses.</p>
+          <p className="mt-2 text-sm text-mutedText">Claim charts will appear once employees start submitting expenses.</p>
         </section>
       )}
 
@@ -335,7 +335,7 @@ function ManagerDashboardView({
 
   if (isError) {
     return (
-      <section className="rounded border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+      <section className="rounded-lg border border-red-200 bg-red-50 p-5 text-sm font-medium text-red-700">
         Manager dashboard could not be loaded. Please refresh the page.
       </section>
     );
@@ -351,13 +351,13 @@ function ManagerDashboardView({
   return (
     <div className="space-y-6">
       <section className="grid gap-4 lg:grid-cols-[1.35fr_0.95fr]">
-        <article className="rounded border border-border bg-surface p-6">
+        <article className="rounded-lg border border-border bg-surface p-5 shadow-card">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">Pending approval amount</p>
-              <p className="mt-3 text-3xl font-semibold text-ink">{formatCurrency(dashboard.summary.pendingAmount)}</p>
+              <p className="text-sm font-semibold text-mutedText">Pending approval amount</p>
+              <p className="mt-3 text-3xl font-bold tracking-tight text-ink">{formatCurrency(dashboard.summary.pendingAmount)}</p>
             </div>
-            <div className="flex h-11 w-11 items-center justify-center rounded bg-blue-50 text-accent">
+            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-accentSoft text-accent">
               <ClipboardCheck size={22} />
             </div>
           </div>
@@ -368,8 +368,8 @@ function ManagerDashboardView({
           </div>
         </article>
 
-        <article className="rounded border border-border bg-surface p-6">
-          <p className="text-sm font-medium text-slate-500">Approval actions</p>
+        <article className="rounded-lg border border-border bg-surface p-5 shadow-card">
+          <p className="text-sm font-semibold text-mutedText">Approval actions</p>
           <div className="mt-5 space-y-3">
             <Button asChild className="w-full justify-between">
               <Link to="/approvals">
@@ -416,18 +416,18 @@ function ManagerDashboardView({
           </section>
         </>
       ) : (
-        <section className="rounded border border-border bg-surface p-8 text-center">
+        <section className="rounded-lg border border-border bg-surface p-8 text-center shadow-card">
           <h2 className="text-lg font-semibold text-ink">No department claim data yet</h2>
-          <p className="mt-2 text-sm text-slate-600">Submitted claims from your department will appear here.</p>
+          <p className="mt-2 text-sm text-mutedText">Submitted claims from your department will appear here.</p>
         </section>
       )}
 
       {hasPendingClaims ? (
         <RecentManagerClaimsTable claims={dashboard.recentPendingClaims} />
       ) : (
-        <section className="rounded border border-border bg-surface p-8 text-center">
+        <section className="rounded-lg border border-border bg-surface p-8 text-center shadow-card">
           <h2 className="text-lg font-semibold text-ink">No pending approvals</h2>
-          <p className="mt-2 text-sm text-slate-600">Your approval queue is clear right now.</p>
+          <p className="mt-2 text-sm text-mutedText">Your approval queue is clear right now.</p>
           <Button asChild className="mt-5" variant="secondary">
             <Link to="/approvals">Open approval queue</Link>
           </Button>
@@ -452,7 +452,7 @@ function FinanceDashboardView({
 
   if (isError) {
     return (
-      <section className="rounded border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+      <section className="rounded-lg border border-red-200 bg-red-50 p-5 text-sm font-medium text-red-700">
         Finance dashboard could not be loaded. Please refresh the page.
       </section>
     );
@@ -468,13 +468,13 @@ function FinanceDashboardView({
   return (
     <div className="space-y-6">
       <section className="grid gap-4 lg:grid-cols-[1.35fr_0.95fr]">
-        <article className="rounded border border-border bg-surface p-6">
+        <article className="rounded-lg border border-border bg-surface p-5 shadow-card">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">Pending review amount</p>
-              <p className="mt-3 text-3xl font-semibold text-ink">{formatCurrency(dashboard.summary.pendingReviewAmount)}</p>
+              <p className="text-sm font-semibold text-mutedText">Pending review amount</p>
+              <p className="mt-3 text-3xl font-bold tracking-tight text-ink">{formatCurrency(dashboard.summary.pendingReviewAmount)}</p>
             </div>
-            <div className="flex h-11 w-11 items-center justify-center rounded bg-amber-50 text-amber-700">
+            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-amber-50 text-amber-700">
               <WalletCards size={22} />
             </div>
           </div>
@@ -485,8 +485,8 @@ function FinanceDashboardView({
           </div>
         </article>
 
-        <article className="rounded border border-border bg-surface p-6">
-          <p className="text-sm font-medium text-slate-500">Finance actions</p>
+        <article className="rounded-lg border border-border bg-surface p-5 shadow-card">
+          <p className="text-sm font-semibold text-mutedText">Finance actions</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <DashboardLink to="/finance-review" label="Open finance review" />
             <DashboardLink to="/reports" label="Open reports" />
@@ -524,18 +524,18 @@ function FinanceDashboardView({
           </section>
         </>
       ) : (
-        <section className="rounded border border-border bg-surface p-8 text-center">
+        <section className="rounded-lg border border-border bg-surface p-8 text-center shadow-card">
           <h2 className="text-lg font-semibold text-ink">No finance claim data yet</h2>
-          <p className="mt-2 text-sm text-slate-600">Claims approved by managers will appear here for finance review.</p>
+          <p className="mt-2 text-sm text-mutedText">Claims approved by managers will appear here for finance review.</p>
         </section>
       )}
 
       {hasReviewClaims ? (
         <RecentFinanceClaimsTable claims={dashboard.recentReviewClaims} />
       ) : (
-        <section className="rounded border border-border bg-surface p-8 text-center">
+        <section className="rounded-lg border border-border bg-surface p-8 text-center shadow-card">
           <h2 className="text-lg font-semibold text-ink">No finance review queue</h2>
-          <p className="mt-2 text-sm text-slate-600">There are no manager-approved or payment-ready claims right now.</p>
+          <p className="mt-2 text-sm text-mutedText">There are no manager-approved or payment-ready claims right now.</p>
           <Button asChild className="mt-5" variant="secondary">
             <Link to="/finance-review">Open finance review</Link>
           </Button>
@@ -581,12 +581,12 @@ function EmployeeDashboardSkeleton() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="h-48 animate-pulse rounded border border-border bg-muted" />
-        <div className="h-48 animate-pulse rounded border border-border bg-muted" />
+        <div className="h-48 animate-pulse rounded-lg border border-border bg-sidebar" />
+        <div className="h-48 animate-pulse rounded-lg border border-border bg-sidebar" />
       </div>
       <div className="grid gap-4 md:grid-cols-5">
         {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="h-28 animate-pulse rounded border border-border bg-muted" />
+          <div key={index} className="h-28 animate-pulse rounded-lg border border-border bg-sidebar" />
         ))}
       </div>
     </div>
@@ -595,9 +595,9 @@ function EmployeeDashboardSkeleton() {
 
 function SummaryCard({ title, value }: { title: string; value: string | number }) {
   return (
-    <article className="rounded border border-border bg-surface p-5">
-      <p className="text-sm font-medium text-slate-500">{title}</p>
-      <p className="mt-3 text-2xl font-semibold text-ink">{value}</p>
+    <article className="rounded-lg border border-border bg-surface p-4 shadow-card">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-mutedText">{title}</p>
+      <p className="mt-3 text-2xl font-bold tracking-tight text-ink">{value}</p>
     </article>
   );
 }
@@ -625,24 +625,24 @@ function AmountPanel({
   format?: 'currency' | 'number';
 }) {
   const className = {
-    green: 'border-green-200 bg-green-50 text-green-700',
+    green: 'border-emerald-200 bg-emerald-50 text-emerald-700',
     amber: 'border-amber-200 bg-amber-50 text-amber-700',
-    blue: 'border-blue-200 bg-blue-50 text-blue-700',
-    slate: 'border-slate-200 bg-slate-50 text-slate-700',
+    blue: 'border-sky-200 bg-sky-50 text-sky-700',
+    slate: 'border-border bg-sidebar text-ink',
   }[tone];
 
   return (
-    <div className={`rounded border p-4 ${className}`}>
-      <p className="text-xs font-medium uppercase">{label}</p>
-      <p className="mt-2 text-lg font-semibold">{format === 'currency' ? formatCurrency(value) : value}</p>
+    <div className={`rounded-md border p-4 ${className}`}>
+      <p className="text-xs font-bold uppercase tracking-[0.12em]">{label}</p>
+      <p className="mt-2 text-lg font-bold">{format === 'currency' ? formatCurrency(value) : value}</p>
     </div>
   );
 }
 
 function ChartPanel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <article className="rounded border border-border bg-surface p-5">
-      <h2 className="text-sm font-semibold text-ink">{title}</h2>
+    <article className="rounded-lg border border-border bg-surface p-5 shadow-card">
+      <h2 className="text-sm font-bold text-ink">{title}</h2>
       <div className="mt-4 h-72">{children}</div>
     </article>
   );
@@ -665,7 +665,7 @@ function StatusPieChart({ data }: { data: DashboardBreakdownItem[] }) {
 
 function RolePieChart({ data }: { data: DashboardBreakdownItem[] }) {
   if (data.length === 0) {
-    return <div className="flex h-full items-center justify-center text-sm text-slate-500">No user data yet.</div>;
+    return <div className="flex h-full items-center justify-center text-sm text-mutedText">No user data yet.</div>;
   }
 
   return (
@@ -688,15 +688,15 @@ function MonthlyAmountChart({ data }: { data: DashboardBreakdownItem[] }) {
       <AreaChart data={data} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
         <defs>
           <linearGradient id="monthlyAmount" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="5%" stopColor="#2563eb" stopOpacity={0.35} />
-            <stop offset="95%" stopColor="#2563eb" stopOpacity={0.02} />
+            <stop offset="5%" stopColor="#079669" stopOpacity={0.35} />
+            <stop offset="95%" stopColor="#079669" stopOpacity={0.02} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-        <XAxis dataKey="label" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
-        <YAxis tick={{ fontSize: 12 }} tickFormatter={compactCurrency} tickLine={false} axisLine={false} width={56} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#E6EAE8" />
+        <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#7C8A86' }} tickLine={false} axisLine={false} />
+        <YAxis tick={{ fontSize: 12, fill: '#7C8A86' }} tickFormatter={compactCurrency} tickLine={false} axisLine={false} width={56} />
         <Tooltip formatter={(value) => [formatCurrency(Number(value)), 'Amount']} />
-        <Area type="monotone" dataKey="amount" stroke="#2563eb" fill="url(#monthlyAmount)" strokeWidth={2} />
+        <Area type="monotone" dataKey="amount" stroke="#079669" fill="url(#monthlyAmount)" strokeWidth={2} />
       </AreaChart>
     </ResponsiveContainer>
   );
@@ -704,17 +704,17 @@ function MonthlyAmountChart({ data }: { data: DashboardBreakdownItem[] }) {
 
 function CategoryBreakdownChart({ data }: { data: DashboardBreakdownItem[] }) {
   if (data.length === 0) {
-    return <div className="flex h-full items-center justify-center text-sm text-slate-500">No category data yet.</div>;
+    return <div className="flex h-full items-center justify-center text-sm text-mutedText">No category data yet.</div>;
   }
 
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data} layout="vertical" margin={{ left: 16, right: 16, top: 8, bottom: 8 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-        <XAxis type="number" tickFormatter={compactCurrency} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-        <YAxis type="category" dataKey="label" width={90} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#E6EAE8" />
+        <XAxis type="number" tickFormatter={compactCurrency} tick={{ fontSize: 12, fill: '#7C8A86' }} axisLine={false} tickLine={false} />
+        <YAxis type="category" dataKey="label" width={90} tick={{ fontSize: 12, fill: '#7C8A86' }} axisLine={false} tickLine={false} />
         <Tooltip formatter={(value) => [formatCurrency(Number(value)), 'Amount']} />
-        <Bar dataKey="amount" radius={[0, 6, 6, 0]} fill="#0f766e" />
+        <Bar dataKey="amount" radius={[0, 6, 6, 0]} fill="#079669" />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -722,23 +722,23 @@ function CategoryBreakdownChart({ data }: { data: DashboardBreakdownItem[] }) {
 
 function RecentClaimsTable({ claims }: { claims: RecentEmployeeClaim[] }) {
   return (
-    <article className="rounded border border-border bg-surface p-5">
+    <article className="rounded-lg border border-border bg-surface p-5 shadow-card">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-ink">Recent claims</h2>
+        <h2 className="text-sm font-bold text-ink">Recent claims</h2>
         <Button asChild variant="ghost" className="h-8 px-2">
           <Link to="/claims">View all</Link>
         </Button>
       </div>
-      <div className="mt-4 overflow-hidden rounded border border-border">
+      <div className="mt-4 overflow-hidden rounded-md border border-border">
         <table className="min-w-full divide-y divide-border text-sm">
           <tbody className="divide-y divide-border bg-surface">
             {claims.map((claim) => (
-              <tr key={claim.id} className="hover:bg-muted">
+              <tr key={claim.id} className="transition hover:bg-accentSoft/45">
                 <td className="px-4 py-3">
                   <Link to={`/claims/${claim.id}`} className="font-medium text-ink hover:text-accent">
                     {claim.title}
                   </Link>
-                  <p className="mt-1 text-xs text-slate-500">{claim.categoryName} - {claim.transactionDate}</p>
+                  <p className="mt-1 text-xs text-mutedText">{claim.categoryName} - {claim.transactionDate}</p>
                 </td>
                 <td className="px-4 py-3 text-right font-medium">{formatCurrency(claim.amount)}</td>
                 <td className="px-4 py-3 text-right">
@@ -755,23 +755,23 @@ function RecentClaimsTable({ claims }: { claims: RecentEmployeeClaim[] }) {
 
 function RecentManagerClaimsTable({ claims }: { claims: RecentManagerClaim[] }) {
   return (
-    <article className="rounded border border-border bg-surface p-5">
+    <article className="rounded-lg border border-border bg-surface p-5 shadow-card">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-ink">Recent pending approvals</h2>
+        <h2 className="text-sm font-bold text-ink">Recent pending approvals</h2>
         <Button asChild variant="ghost" className="h-8 px-2">
           <Link to="/approvals">View all</Link>
         </Button>
       </div>
-      <div className="mt-4 overflow-hidden rounded border border-border">
+      <div className="mt-4 overflow-hidden rounded-md border border-border">
         <table className="min-w-full divide-y divide-border text-sm">
           <tbody className="divide-y divide-border bg-surface">
             {claims.map((claim) => (
-              <tr key={claim.id} className="hover:bg-muted">
+              <tr key={claim.id} className="transition hover:bg-accentSoft/45">
                 <td className="px-4 py-3">
                   <Link to={`/approvals/${claim.id}`} className="font-medium text-ink hover:text-accent">
                     {claim.title}
                   </Link>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-mutedText">
                     {claim.employeeName} - {claim.categoryName} - {claim.transactionDate}
                   </p>
                 </td>
@@ -790,23 +790,23 @@ function RecentManagerClaimsTable({ claims }: { claims: RecentManagerClaim[] }) 
 
 function RecentFinanceClaimsTable({ claims }: { claims: RecentFinanceClaim[] }) {
   return (
-    <article className="rounded border border-border bg-surface p-5">
+    <article className="rounded-lg border border-border bg-surface p-5 shadow-card">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-ink">Recent finance review</h2>
+        <h2 className="text-sm font-bold text-ink">Recent finance review</h2>
         <Button asChild variant="ghost" className="h-8 px-2">
           <Link to="/finance-review">View all</Link>
         </Button>
       </div>
-      <div className="mt-4 overflow-hidden rounded border border-border">
+      <div className="mt-4 overflow-hidden rounded-md border border-border">
         <table className="min-w-full divide-y divide-border text-sm">
           <tbody className="divide-y divide-border bg-surface">
             {claims.map((claim) => (
-              <tr key={claim.id} className="hover:bg-muted">
+              <tr key={claim.id} className="transition hover:bg-accentSoft/45">
                 <td className="px-4 py-3">
                   <Link to={`/finance-review/${claim.id}`} className="font-medium text-ink hover:text-accent">
                     {claim.title}
                   </Link>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-mutedText">
                     {claim.employeeName} - {claim.departmentName} - {claim.categoryName}
                   </p>
                 </td>
@@ -825,27 +825,27 @@ function RecentFinanceClaimsTable({ claims }: { claims: RecentFinanceClaim[] }) 
 
 function RecentAuditLogs({ logs }: { logs: AdminDashboard['recentAuditLogs'] }) {
   return (
-    <article className="rounded border border-border bg-surface p-5">
+    <article className="rounded-lg border border-border bg-surface p-5 shadow-card">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-ink">Recent audit logs</h2>
+        <h2 className="text-sm font-bold text-ink">Recent audit logs</h2>
         <Button asChild variant="ghost" className="h-8 px-2">
           <Link to="/audit-logs">View all</Link>
         </Button>
       </div>
 
       {logs.length === 0 ? (
-        <div className="mt-4 rounded border border-border bg-muted p-6 text-center text-sm text-slate-500">
+        <div className="mt-4 rounded-md border border-border bg-muted p-6 text-center text-sm text-mutedText">
           No audit activity yet.
         </div>
       ) : (
-        <div className="mt-4 overflow-hidden rounded border border-border">
+        <div className="mt-4 overflow-hidden rounded-md border border-border">
           <table className="min-w-full divide-y divide-border text-sm">
             <tbody className="divide-y divide-border bg-surface">
               {logs.map((log) => (
-                <tr key={log.id} className="hover:bg-muted">
+                <tr key={log.id} className="transition hover:bg-accentSoft/45">
                   <td className="px-4 py-3">
                     <p className="font-medium text-ink">{formatStatus(log.action)}</p>
-                    <p className="mt-1 text-xs text-slate-500">{log.actorEmail ?? 'System'} - {formatDateTime(log.createdAt)}</p>
+                    <p className="mt-1 text-xs text-mutedText">{log.actorEmail ?? 'System'} - {formatDateTime(log.createdAt)}</p>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Badge className="border-slate-200 bg-slate-50 text-slate-700">{formatStatus(log.resourceType)}</Badge>
@@ -870,15 +870,15 @@ function StatusBadge({ status }: { status: ClaimStatus }) {
 
 function statusColor(status: ClaimStatus) {
   const colors: Record<ClaimStatus, string> = {
-    DRAFT: '#64748b',
-    SUBMITTED: '#2563eb',
-    REVISION_REQUESTED: '#9333ea',
-    REVISED: '#0891b2',
-    MANAGER_APPROVED: '#0f766e',
-    MANAGER_REJECTED: '#dc2626',
-    FINANCE_APPROVED: '#d97706',
-    PAID: '#16a34a',
-    CANCELLED: '#475569',
+    DRAFT: '#7C8A86',
+    SUBMITTED: '#4F7DF3',
+    REVISION_REQUESTED: '#8B5CF6',
+    REVISED: '#14B8A6',
+    MANAGER_APPROVED: '#079669',
+    MANAGER_REJECTED: '#EF4444',
+    FINANCE_APPROVED: '#F59E0B',
+    PAID: '#22C55E',
+    CANCELLED: '#94A3B8',
   };
 
   return colors[status];
@@ -886,19 +886,19 @@ function statusColor(status: ClaimStatus) {
 
 function roleColor(role: string) {
   const colors: Record<string, string> = {
-    ADMIN: '#2563eb',
-    EMPLOYEE: '#16a34a',
-    MANAGER: '#d97706',
-    FINANCE: '#dc2626',
+    ADMIN: '#4F7DF3',
+    EMPLOYEE: '#079669',
+    MANAGER: '#F59E0B',
+    FINANCE: '#EF4444',
   };
 
-  return colors[role] ?? '#64748b';
+  return colors[role] ?? '#7C8A86';
 }
 
 function statusBadgeClass(status: ClaimStatus) {
   const classes: Record<ClaimStatus, string> = {
     DRAFT: 'border-slate-200 bg-slate-50 text-slate-700',
-    SUBMITTED: 'border-blue-200 bg-blue-50 text-blue-700',
+    SUBMITTED: 'border-sky-200 bg-sky-50 text-sky-700',
     REVISION_REQUESTED: 'border-purple-200 bg-purple-50 text-purple-700',
     REVISED: 'border-cyan-200 bg-cyan-50 text-cyan-700',
     MANAGER_APPROVED: 'border-teal-200 bg-teal-50 text-teal-700',

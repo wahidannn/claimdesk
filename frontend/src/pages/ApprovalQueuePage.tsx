@@ -113,7 +113,7 @@ export function ApprovalQueuePage() {
       </div>
 
       {notice && (
-        <div className="rounded border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-accent">{notice}</div>
+        <div className="rounded-md border border-accent/20 bg-accentSoft px-4 py-3 text-sm font-medium text-accent">{notice}</div>
       )}
 
       <form className="grid gap-3 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr_auto]" onSubmit={handleSearch}>
@@ -161,7 +161,7 @@ export function ApprovalQueuePage() {
         </Button>
       </form>
 
-      <div className="rounded border border-border bg-surface">
+      <div className="overflow-hidden rounded-lg border border-border bg-surface shadow-card">
         <Table>
           <thead>
             <tr>
