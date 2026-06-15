@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Eye, Search } from 'lucide-react';
 import { FormEvent, useState } from 'react';
+import { ActionMenu } from '../components/ui/ActionMenu';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -171,7 +172,7 @@ export function AuditLogsPage() {
               <Th>Action</Th>
               <Th>Resource</Th>
               <Th>Description</Th>
-              <Th className="w-28">Detail</Th>
+              <Th className="w-12 text-right">Action</Th>
             </tr>
           </thead>
           <tbody>
@@ -190,11 +191,16 @@ export function AuditLogsPage() {
                   <div className="text-sm text-slate-500">ID: {auditLog.resourceId ?? '-'}</div>
                 </Td>
                 <Td>{auditLog.description}</Td>
-                <Td>
-                  <Button type="button" variant="secondary" onClick={() => setSelectedLog(auditLog)}>
-                    <Eye size={15} />
-                    View
-                  </Button>
+                <Td className="text-right">
+                  <ActionMenu
+                    items={[
+                      {
+                        label: 'View detail',
+                        icon: <Eye size={15} />,
+                        onClick: () => setSelectedLog(auditLog),
+                      },
+                    ]}
+                  />
                 </Td>
               </tr>
             ))}

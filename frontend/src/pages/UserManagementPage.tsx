@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Edit, Plus, Search } from 'lucide-react';
 import { FormEvent, useMemo, useState } from 'react';
+import { ActionMenu } from '../components/ui/ActionMenu';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -185,7 +186,7 @@ export function UserManagementPage() {
               <Th>Role</Th>
               <Th>Department</Th>
               <Th>Status</Th>
-              <Th className="w-48">Actions</Th>
+              <Th className="w-12 text-right">Action</Th>
             </tr>
           </thead>
           <tbody>
@@ -209,20 +210,21 @@ export function UserManagementPage() {
                     {user.active ? 'Active' : 'Inactive'}
                   </Badge>
                 </Td>
-                <Td>
-                  <div className="flex flex-wrap gap-2">
-                    <Button type="button" variant="secondary" onClick={() => openEditModal(user)}>
-                      <Edit size={15} />
-                      Edit
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => statusMutation.mutate({ id: user.id, active: !user.active })}
-                    >
-                      {user.active ? 'Deactivate' : 'Activate'}
-                    </Button>
-                  </div>
+                <Td className="text-right">
+                  <ActionMenu
+                    items={[
+                      {
+                        label: 'Edit',
+                        icon: <Edit size={15} />,
+                        onClick: () => openEditModal(user),
+                      },
+                      {
+                        label: user.active ? 'Deactivate' : 'Activate',
+                        danger: user.active,
+                        onClick: () => statusMutation.mutate({ id: user.id, active: !user.active }),
+                      },
+                    ]}
+                  />
                 </Td>
               </tr>
             ))}

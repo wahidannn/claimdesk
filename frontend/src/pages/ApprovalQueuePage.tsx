@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Eye, Search } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ActionMenu } from '../components/ui/ActionMenu';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
@@ -170,7 +171,7 @@ export function ApprovalQueuePage() {
               <Th>Category</Th>
               <Th>Amount</Th>
               <Th>Status</Th>
-              <Th className="w-72">Actions</Th>
+              <Th className="w-12 text-right">Action</Th>
             </tr>
           </thead>
           <tbody>
@@ -189,36 +190,33 @@ export function ApprovalQueuePage() {
                 <Td>
                   <StatusBadge status={claim.status} />
                 </Td>
-                <Td>
-                  <div className="flex flex-wrap gap-2">
-                    <Button asChild variant="secondary">
-                      <Link to={`/approvals/${claim.id}`}>
-                        <Eye size={15} />
-                        Detail
-                      </Link>
-                    </Button>
-                    {claim.status === 'SUBMITTED' && (
-                      <>
-                        <Button type="button" onClick={() => openModal({ id: claim.id, title: claim.title, action: 'approve' })}>
-                          Approve
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() => openModal({ id: claim.id, title: claim.title, action: 'revision' })}
-                        >
-                          Request Revision
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() => openModal({ id: claim.id, title: claim.title, action: 'reject' })}
-                        >
-                          Reject
-                        </Button>
-                      </>
-                    )}
-                  </div>
+                <Td className="text-right">
+                  <ActionMenu
+                    items={[
+                      {
+                        label: 'Detail',
+                        icon: <Eye size={15} />,
+                        asChild: <Link to={`/approvals/${claim.id}`} />,
+                      },
+                      ...(claim.status === 'SUBMITTED'
+                        ? [
+                            {
+                              label: 'Approve',
+                              onClick: () => openModal({ id: claim.id, title: claim.title, action: 'approve' }),
+                            },
+                            {
+                              label: 'Request Revision',
+                              onClick: () => openModal({ id: claim.id, title: claim.title, action: 'revision' }),
+                            },
+                            {
+                              label: 'Reject',
+                              danger: true,
+                              onClick: () => openModal({ id: claim.id, title: claim.title, action: 'reject' }),
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
                 </Td>
               </tr>
             ))}

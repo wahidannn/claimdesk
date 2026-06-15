@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Edit, Eye, Plus, Search } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ActionMenu } from '../components/ui/ActionMenu';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
@@ -153,7 +154,7 @@ export function MyClaimsPage() {
               <Th>Amount</Th>
               <Th>Date</Th>
               <Th>Status</Th>
-              <Th className="w-64">Actions</Th>
+              <Th className="w-12 text-right">Action</Th>
             </tr>
           </thead>
           <tbody>
@@ -169,44 +170,45 @@ export function MyClaimsPage() {
                 <Td>
                   <StatusBadge status={claim.status} />
                 </Td>
-                <Td>
-                  <div className="flex flex-wrap gap-2">
-                    <Button asChild variant="secondary">
-                      <Link to={`/claims/${claim.id}`}>
-                        <Eye size={15} />
-                        Detail
-                      </Link>
-                    </Button>
-                    {(claim.status === 'DRAFT' || claim.status === 'REVISION_REQUESTED' || claim.status === 'REVISED') && (
-                      <Button asChild variant="secondary">
-                        <Link to={`/claims/${claim.id}/edit`}>
-                          <Edit size={15} />
-                          Edit
-                        </Link>
-                      </Button>
-                    )}
-                    {(claim.status === 'DRAFT' || claim.status === 'REVISED') && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => actionMutation.mutate({ id: claim.id, action: 'submit' })}
-                      >
-                        Submit
-                      </Button>
-                    )}
-                    {(claim.status === 'DRAFT' ||
+                <Td className="text-right">
+                  <ActionMenu
+                    items={[
+                      {
+                        label: 'Detail',
+                        icon: <Eye size={15} />,
+                        asChild: <Link to={`/claims/${claim.id}`} />,
+                      },
+                      ...(claim.status === 'DRAFT' || claim.status === 'REVISION_REQUESTED' || claim.status === 'REVISED'
+                        ? [
+                            {
+                              label: 'Edit',
+                              icon: <Edit size={15} />,
+                              asChild: <Link to={`/claims/${claim.id}/edit`} />,
+                            },
+                          ]
+                        : []),
+                      ...(claim.status === 'DRAFT' || claim.status === 'REVISED'
+                        ? [
+                            {
+                              label: 'Submit',
+                              onClick: () => actionMutation.mutate({ id: claim.id, action: 'submit' }),
+                            },
+                          ]
+                        : []),
+                      ...(claim.status === 'DRAFT' ||
                       claim.status === 'SUBMITTED' ||
                       claim.status === 'REVISION_REQUESTED' ||
-                      claim.status === 'REVISED') && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => actionMutation.mutate({ id: claim.id, action: 'cancel' })}
-                      >
-                        Cancel
-                      </Button>
-                    )}
-                  </div>
+                      claim.status === 'REVISED'
+                        ? [
+                            {
+                              label: 'Cancel',
+                              danger: true,
+                              onClick: () => actionMutation.mutate({ id: claim.id, action: 'cancel' }),
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
                 </Td>
               </tr>
             ))}

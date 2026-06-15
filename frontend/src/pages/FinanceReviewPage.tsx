@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Eye, Search } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ActionMenu } from '../components/ui/ActionMenu';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
@@ -157,7 +158,7 @@ export function FinanceReviewPage() {
               <Th>Category</Th>
               <Th>Amount</Th>
               <Th>Status</Th>
-              <Th className="w-72">Actions</Th>
+              <Th className="w-12 text-right">Action</Th>
             </tr>
           </thead>
           <tbody>
@@ -176,25 +177,32 @@ export function FinanceReviewPage() {
                 <Td>
                   <StatusBadge status={claim.status} />
                 </Td>
-                <Td>
-                  <div className="flex flex-wrap gap-2">
-                    <Button asChild variant="secondary">
-                      <Link to={`/finance-review/${claim.id}`}>
-                        <Eye size={15} />
-                        Detail
-                      </Link>
-                    </Button>
-                    {claim.status === 'MANAGER_APPROVED' && (
-                      <Button type="button" onClick={() => openModal({ id: claim.id, title: claim.title, action: 'approve' })}>
-                        Approve
-                      </Button>
-                    )}
-                    {claim.status === 'FINANCE_APPROVED' && (
-                      <Button type="button" onClick={() => openModal({ id: claim.id, title: claim.title, action: 'mark-paid' })}>
-                        Mark Paid
-                      </Button>
-                    )}
-                  </div>
+                <Td className="text-right">
+                  <ActionMenu
+                    items={[
+                      {
+                        label: 'Detail',
+                        icon: <Eye size={15} />,
+                        asChild: <Link to={`/finance-review/${claim.id}`} />,
+                      },
+                      ...(claim.status === 'MANAGER_APPROVED'
+                        ? [
+                            {
+                              label: 'Approve',
+                              onClick: () => openModal({ id: claim.id, title: claim.title, action: 'approve' }),
+                            },
+                          ]
+                        : []),
+                      ...(claim.status === 'FINANCE_APPROVED'
+                        ? [
+                            {
+                              label: 'Mark Paid',
+                              onClick: () => openModal({ id: claim.id, title: claim.title, action: 'mark-paid' }),
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
                 </Td>
               </tr>
             ))}

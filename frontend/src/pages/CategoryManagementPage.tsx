@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Edit, Plus, Search } from 'lucide-react';
 import { FormEvent, useState } from 'react';
+import { ActionMenu } from '../components/ui/ActionMenu';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -149,7 +150,7 @@ export function CategoryManagementPage() {
               <Th>Name</Th>
               <Th>Description</Th>
               <Th>Status</Th>
-              <Th className="w-48">Actions</Th>
+              <Th className="w-12 text-right">Action</Th>
             </tr>
           </thead>
           <tbody>
@@ -162,20 +163,21 @@ export function CategoryManagementPage() {
                     {category.active ? 'Active' : 'Inactive'}
                   </Badge>
                 </Td>
-                <Td>
-                  <div className="flex flex-wrap gap-2">
-                    <Button type="button" variant="secondary" onClick={() => openEditModal(category)}>
-                      <Edit size={15} />
-                      Edit
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => statusMutation.mutate({ id: category.id, active: !category.active })}
-                    >
-                      {category.active ? 'Deactivate' : 'Activate'}
-                    </Button>
-                  </div>
+                <Td className="text-right">
+                  <ActionMenu
+                    items={[
+                      {
+                        label: 'Edit',
+                        icon: <Edit size={15} />,
+                        onClick: () => openEditModal(category),
+                      },
+                      {
+                        label: category.active ? 'Deactivate' : 'Activate',
+                        danger: category.active,
+                        onClick: () => statusMutation.mutate({ id: category.id, active: !category.active }),
+                      },
+                    ]}
+                  />
                 </Td>
               </tr>
             ))}

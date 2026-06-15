@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Edit, Plus, Search } from 'lucide-react';
 import { FormEvent, useState } from 'react';
+import { ActionMenu } from '../components/ui/ActionMenu';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -156,7 +157,7 @@ export function DepartmentManagementPage() {
               <Th>Name</Th>
               <Th>Manager</Th>
               <Th>Status</Th>
-              <Th className="w-48">Actions</Th>
+              <Th className="w-12 text-right">Action</Th>
             </tr>
           </thead>
           <tbody>
@@ -178,20 +179,21 @@ export function DepartmentManagementPage() {
                     {department.active ? 'Active' : 'Inactive'}
                   </Badge>
                 </Td>
-                <Td>
-                  <div className="flex flex-wrap gap-2">
-                    <Button type="button" variant="secondary" onClick={() => openEditModal(department)}>
-                      <Edit size={15} />
-                      Edit
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => statusMutation.mutate({ id: department.id, active: !department.active })}
-                    >
-                      {department.active ? 'Deactivate' : 'Activate'}
-                    </Button>
-                  </div>
+                <Td className="text-right">
+                  <ActionMenu
+                    items={[
+                      {
+                        label: 'Edit',
+                        icon: <Edit size={15} />,
+                        onClick: () => openEditModal(department),
+                      },
+                      {
+                        label: department.active ? 'Deactivate' : 'Activate',
+                        danger: department.active,
+                        onClick: () => statusMutation.mutate({ id: department.id, active: !department.active }),
+                      },
+                    ]}
+                  />
                 </Td>
               </tr>
             ))}
