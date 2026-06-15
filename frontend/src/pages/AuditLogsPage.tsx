@@ -11,6 +11,7 @@ import { Table, Td, Th } from '../components/ui/Table';
 import { listAuditLogs } from '../features/audit-logs/api';
 import type { AuditAction, AuditLog, AuditResourceType } from '../features/audit-logs/types';
 import type { Role } from '../features/auth/types';
+import { formatDateTime } from '../lib/date-format';
 
 const roles: Role[] = ['ADMIN', 'EMPLOYEE', 'MANAGER', 'FINANCE'];
 
@@ -178,7 +179,7 @@ export function AuditLogsPage() {
           <tbody>
             {auditLogs.map((auditLog) => (
               <tr key={auditLog.id}>
-                <Td className="whitespace-nowrap text-slate-600">{auditLog.createdAt}</Td>
+                <Td className="whitespace-nowrap text-slate-600">{formatDateTime(auditLog.createdAt)}</Td>
                 <Td>
                   <div className="font-medium">{auditLog.actorEmail ?? '-'}</div>
                   <div className="text-sm text-slate-500">{auditLog.actorRole ?? '-'}</div>

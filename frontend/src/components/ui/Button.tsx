@@ -9,7 +9,7 @@ import { cn } from '../../lib/utils';
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   asChild?: boolean;
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'warning';
   children?: ReactNode;
 };
 
@@ -19,6 +19,8 @@ export function Button({ asChild = false, className, variant = 'primary', childr
     variant === 'primary' && 'bg-accent text-white shadow-sm hover:bg-[#067A57]',
     variant === 'secondary' && 'border border-border bg-surface text-ink hover:border-accent/30 hover:bg-accentSoft',
     variant === 'ghost' && 'text-mutedText hover:bg-accentSoft hover:text-accent',
+    variant === 'danger' && 'border border-red-200 bg-red-50 text-red-700 shadow-sm hover:bg-red-100',
+    variant === 'warning' && 'border border-amber-200 bg-amber-50 text-amber-800 shadow-sm hover:bg-amber-100',
     className,
   );
 

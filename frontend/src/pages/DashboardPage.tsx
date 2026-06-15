@@ -32,6 +32,7 @@ import type {
 } from '../features/dashboard/types';
 import { formatCurrency } from '../features/claims/currency';
 import type { ClaimStatus } from '../features/claims/types';
+import { formatDate, formatDateTime } from '../lib/date-format';
 
 export function DashboardPage() {
   const { user } = useAuth();
@@ -740,7 +741,7 @@ function RecentClaimsTable({ claims }: { claims: RecentEmployeeClaim[] }) {
                   <Link to={`/claims/${claim.id}`} className="font-medium text-ink hover:text-accent">
                     {claim.title}
                   </Link>
-                  <p className="mt-1 text-xs text-mutedText">{claim.categoryName} - {claim.transactionDate}</p>
+                  <p className="mt-1 text-xs text-mutedText">{claim.categoryName} - {formatDate(claim.transactionDate)}</p>
                 </td>
                 <td className="px-4 py-3 text-right font-medium">{formatCurrency(claim.amount)}</td>
                 <td className="px-4 py-3 text-right">
@@ -774,7 +775,7 @@ function RecentManagerClaimsTable({ claims }: { claims: RecentManagerClaim[] }) 
                     {claim.title}
                   </Link>
                   <p className="mt-1 text-xs text-mutedText">
-                    {claim.employeeName} - {claim.categoryName} - {claim.transactionDate}
+                    {claim.employeeName} - {claim.categoryName} - {formatDate(claim.transactionDate)}
                   </p>
                 </td>
                 <td className="px-4 py-3 text-right font-medium">{formatCurrency(claim.amount)}</td>
@@ -927,13 +928,6 @@ function compactCurrency(value: number) {
   }
 
   return String(value);
-}
-
-function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat('en', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value));
 }
 
 function dashboardTitle(role: string) {

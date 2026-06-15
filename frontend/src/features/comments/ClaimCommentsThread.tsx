@@ -4,6 +4,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Textarea } from '../../components/ui/Textarea';
 import { getApiErrorMessage } from '../../lib/api-error';
+import { formatDateTime } from '../../lib/date-format';
 import { createClaimComment, listClaimComments } from './api';
 
 export function ClaimCommentsThread({ claimId }: { claimId: number }) {
@@ -63,7 +64,7 @@ export function ClaimCommentsThread({ claimId }: { claimId: number }) {
                 </div>
                 <p className="mt-1 text-xs text-slate-500">{comment.author.email}</p>
               </div>
-              <time className="text-xs text-slate-400">{comment.createdAt}</time>
+              <time className="text-xs text-slate-400">{formatDateTime(comment.createdAt)}</time>
             </div>
             <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">{comment.message}</p>
           </article>

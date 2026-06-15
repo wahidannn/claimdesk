@@ -24,6 +24,7 @@ import {
   markNotificationRead,
 } from '../features/notifications/api';
 import type { AppNotification } from '../features/notifications/types';
+import { formatDateTime } from '../lib/date-format';
 import { cn } from '../lib/utils';
 
 const navItems = [
@@ -186,7 +187,7 @@ export function AppLayout() {
                           {!notification.read && <span className="mt-1 h-2 w-2 rounded-full bg-accent" />}
                         </div>
                         <p className="mt-1 text-sm leading-5 text-mutedText">{notification.message}</p>
-                        <p className="mt-2 text-xs text-mutedText/70">{notification.createdAt}</p>
+                        <p className="mt-2 text-xs text-mutedText/70">{formatDateTime(notification.createdAt)}</p>
                       </button>
                     ))}
                     {!notificationsQuery.isLoading && (notificationsQuery.data?.items ?? []).length === 0 && (

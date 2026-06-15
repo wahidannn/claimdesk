@@ -17,6 +17,7 @@ import { formatCurrency } from '../features/claims/currency';
 import { StatusBadge } from '../features/claims/format';
 import type { ExpenseAttachment } from '../features/claims/types';
 import { getApiErrorMessage } from '../lib/api-error';
+import { formatDate, formatDateTime } from '../lib/date-format';
 
 export function ClaimDetailPage() {
   const params = useParams();
@@ -139,7 +140,7 @@ export function ClaimDetailPage() {
             </Button>
           )}
           {canCancelClaim && (
-            <Button type="button" variant="ghost" onClick={() => actionMutation.mutate('cancel')}>
+            <Button type="button" variant="danger" onClick={() => actionMutation.mutate('cancel')}>
               Cancel Claim
             </Button>
           )}
@@ -161,9 +162,9 @@ export function ClaimDetailPage() {
 
       <section className="grid gap-4 rounded-lg border border-border bg-surface p-5 shadow-card sm:grid-cols-2">
         <DetailItem label="Amount" value={formatCurrency(claim.amount)} />
-        <DetailItem label="Transaction Date" value={claim.transactionDate} />
-        <DetailItem label="Submitted At" value={claim.submittedAt ?? '-'} />
-        <DetailItem label="Created At" value={claim.createdAt} />
+        <DetailItem label="Transaction Date" value={formatDate(claim.transactionDate)} />
+        <DetailItem label="Submitted At" value={formatDateTime(claim.submittedAt)} />
+        <DetailItem label="Created At" value={formatDateTime(claim.createdAt)} />
         <div className="sm:col-span-2">
           <DetailItem label="Description" value={claim.description ?? '-'} />
         </div>
@@ -223,7 +224,7 @@ export function ClaimDetailPage() {
                 {canManageReceipts && (
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="danger"
                     onClick={() => deleteMutation.mutate(attachment.id)}
                     disabled={deleteMutation.isPending}
                   >

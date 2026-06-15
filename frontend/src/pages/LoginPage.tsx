@@ -35,8 +35,8 @@ export function LoginPage() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'admin@example.com',
-      password: 'password123',
+      email: '',
+      password: '',
     },
   });
 
@@ -97,10 +97,6 @@ export function LoginPage() {
             {isSubmitting ? 'Logging in...' : 'Login'}
           </Button>
         </form>
-
-        <div className="mt-6 rounded-md border border-border bg-sidebar p-3 text-sm text-mutedText">
-          Demo: admin@example.com / password123
-        </div>
       </section>
     </main>
   );

@@ -15,6 +15,7 @@ import { StatusBadge } from '../features/claims/format';
 import type { ClaimStatus } from '../features/claims/types';
 import { approveFinanceClaim, listFinanceClaims, markClaimPaid } from '../features/finance-review/api';
 import { getApiErrorMessage } from '../lib/api-error';
+import { formatDate } from '../lib/date-format';
 
 type PendingAction = {
   id: number;
@@ -166,7 +167,7 @@ export function FinanceReviewPage() {
               <tr key={claim.id}>
                 <Td>
                   <div className="font-medium">{claim.title}</div>
-                  <div className="text-sm text-slate-500">{claim.transactionDate}</div>
+                  <div className="text-sm text-slate-500">{formatDate(claim.transactionDate)}</div>
                 </Td>
                 <Td>
                   <div className="font-medium">{claim.employee.name}</div>

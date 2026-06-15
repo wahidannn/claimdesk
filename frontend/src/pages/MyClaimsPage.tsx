@@ -12,6 +12,7 @@ import { formatCurrency } from '../features/claims/currency';
 import { StatusBadge } from '../features/claims/format';
 import type { ClaimStatus } from '../features/claims/types';
 import { getApiErrorMessage } from '../lib/api-error';
+import { formatDate } from '../lib/date-format';
 
 const statuses: ClaimStatus[] = [
   'DRAFT',
@@ -166,7 +167,7 @@ export function MyClaimsPage() {
                 </Td>
                 <Td>{claim.category.name}</Td>
                 <Td>{formatCurrency(claim.amount)}</Td>
-                <Td>{claim.transactionDate}</Td>
+                <Td>{formatDate(claim.transactionDate)}</Td>
                 <Td>
                   <StatusBadge status={claim.status} />
                 </Td>

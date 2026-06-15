@@ -14,6 +14,7 @@ import { StatusBadge } from '../features/claims/format';
 import type { ExpenseAttachment } from '../features/claims/types';
 import { approveFinanceClaim, getFinanceClaim, markClaimPaid } from '../features/finance-review/api';
 import { getApiErrorMessage } from '../lib/api-error';
+import { formatDate, formatDateTime } from '../lib/date-format';
 
 type ReviewMode = 'manager' | 'finance';
 type PendingAction = 'manager-approve' | 'manager-reject' | 'manager-revision' | 'finance-approve' | 'mark-paid';
@@ -107,10 +108,10 @@ export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
               <Button type="button" onClick={() => setPendingAction('manager-approve')}>
                 Approve
               </Button>
-              <Button type="button" variant="ghost" onClick={() => setPendingAction('manager-reject')}>
+              <Button type="button" variant="danger" onClick={() => setPendingAction('manager-reject')}>
                 Reject
               </Button>
-              <Button type="button" variant="ghost" onClick={() => setPendingAction('manager-revision')}>
+              <Button type="button" variant="warning" onClick={() => setPendingAction('manager-revision')}>
                 Request Revision
               </Button>
             </>
@@ -131,13 +132,13 @@ export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
       <section className="grid gap-4 rounded-lg border border-border bg-surface p-5 shadow-card sm:grid-cols-2 lg:grid-cols-3">
         <DetailItem label="Amount" value={formatCurrency(claim.amount)} />
         <DetailItem label="Category" value={claim.category.name} />
-        <DetailItem label="Transaction Date" value={claim.transactionDate} />
+        <DetailItem label="Transaction Date" value={formatDate(claim.transactionDate)} />
         <DetailItem label="Employee Email" value={claim.employee.email} />
-        <DetailItem label="Submitted At" value={claim.submittedAt ?? '-'} />
-        <DetailItem label="Manager Reviewed At" value={claim.managerReviewedAt ?? '-'} />
-        <DetailItem label="Finance Reviewed At" value={claim.financeReviewedAt ?? '-'} />
-        <DetailItem label="Paid At" value={claim.paidAt ?? '-'} />
-        <DetailItem label="Created At" value={claim.createdAt} />
+        <DetailItem label="Submitted At" value={formatDateTime(claim.submittedAt)} />
+        <DetailItem label="Manager Reviewed At" value={formatDateTime(claim.managerReviewedAt)} />
+        <DetailItem label="Finance Reviewed At" value={formatDateTime(claim.financeReviewedAt)} />
+        <DetailItem label="Paid At" value={formatDateTime(claim.paidAt)} />
+        <DetailItem label="Created At" value={formatDateTime(claim.createdAt)} />
         <div className="sm:col-span-2 lg:col-span-3">
           <DetailItem label="Description" value={claim.description ?? '-'} />
         </div>
@@ -198,7 +199,7 @@ export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
             <div key={approvalNote.id} className="rounded-md border border-border px-4 py-3">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <div className="font-medium">{approvalNote.action.split('_').join(' ')}</div>
-                <div className="text-sm text-slate-500">{approvalNote.createdAt}</div>
+                <div className="text-sm text-slate-500">{formatDateTime(approvalNote.createdAt)}</div>
               </div>
               <p className="mt-1 text-sm text-slate-600">
                 {approvalNote.reviewer.name} ({approvalNote.reviewer.role})

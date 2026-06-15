@@ -14,6 +14,7 @@ import type { ClaimStatus } from '../features/claims/types';
 import { exportAuditLogs, exportClaimReport, getClaimReportSummary, listClaimReports } from '../features/reports/api';
 import type { ClaimReportParams } from '../features/reports/types';
 import { getApiErrorMessage } from '../lib/api-error';
+import { formatDate, formatDateTime } from '../lib/date-format';
 
 const statuses: ClaimStatus[] = [
   'DRAFT',
@@ -204,7 +205,7 @@ export function ReportsPage() {
               <tr key={row.claimId}>
                 <Td className="min-w-52">
                   <div className="line-clamp-1 font-semibold">{row.title}</div>
-                  <div className="text-xs text-mutedText">{row.transactionDate}</div>
+                  <div className="text-xs text-mutedText">{formatDate(row.transactionDate)}</div>
                 </Td>
                 <Td className="min-w-56">
                   <div className="font-semibold">{row.employeeName}</div>
@@ -216,7 +217,7 @@ export function ReportsPage() {
                 <Td>
                   <StatusBadge status={row.status} />
                 </Td>
-                <Td className="max-w-36 whitespace-nowrap text-sm">{formatShortDateTime(row.paidAt)}</Td>
+                <Td className="max-w-36 whitespace-nowrap text-sm">{formatDateTime(row.paidAt)}</Td>
               </tr>
             ))}
             {!reportsQuery.isLoading && reports.length === 0 && (
@@ -321,22 +322,4 @@ function downloadBlob(blob: Blob, filename: string) {
 
 function todayStamp() {
   return new Date().toISOString().slice(0, 10).replace(/-/g, '');
-}
-
-function formatShortDateTime(value: string | null | undefined) {
-  if (!value) {
-    return '-';
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return value.slice(0, 10);
-  }
-
-  return new Intl.DateTimeFormat('en-CA', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(date);
 }
