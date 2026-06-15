@@ -101,7 +101,12 @@ export function ActionMenu({ items, label = 'Open row actions' }: ActionMenuProp
                 key: item.label,
                 className: cn(menuItemClassName(item.danger, item.disabled), item.asChild.props.className),
                 onClick: () => closeAndRun(item.onClick),
-              })
+              }, (
+                <>
+                  {item.icon}
+                  <span>{item.label}</span>
+                </>
+              ))
             ) : (
               <button
                 key={item.label}
