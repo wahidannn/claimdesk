@@ -104,7 +104,7 @@ export function ReportsPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="min-w-0 space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Reports</h1>
@@ -121,7 +121,7 @@ export function ReportsPage() {
       )}
 
       {summary && (
-        <section className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
+        <section className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-3">
           <SummaryCard title="Total Claims" value={summary.totalClaims} />
           <SummaryCard title="Total Amount" value={formatCurrency(summary.totalAmount)} />
           <SummaryCard title="Paid Amount" value={formatCurrency(summary.paidAmount)} />
@@ -131,10 +131,10 @@ export function ReportsPage() {
       )}
 
       <form
-        className="grid gap-3 rounded-lg border border-border bg-surface p-3 shadow-card sm:grid-cols-2 lg:grid-cols-[minmax(220px,1.4fr)_repeat(3,minmax(132px,1fr))] xl:grid-cols-[minmax(240px,1.7fr)_repeat(6,minmax(128px,1fr))_auto]"
+        className="grid min-w-0 gap-3 rounded-lg border border-border bg-surface p-3 shadow-card sm:grid-cols-2 lg:grid-cols-[minmax(0,1.7fr)_repeat(4,minmax(0,1fr))_auto]"
         onSubmit={handleSearch}
       >
-        <div className="relative sm:col-span-2 lg:col-span-1">
+        <div className="relative min-w-0 sm:col-span-2 lg:col-span-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-mutedText/70" size={17} />
           <Input
             className="pl-10"
@@ -166,20 +166,6 @@ export function ReportsPage() {
           ))}
         </Select>
         <Input
-          type="number"
-          min={1}
-          value={draftFilters.departmentId}
-          onChange={(event) => setDraftFilters((value) => ({ ...value, departmentId: event.target.value }))}
-          placeholder="Department"
-        />
-        <Input
-          type="number"
-          min={1}
-          value={draftFilters.employeeId}
-          onChange={(event) => setDraftFilters((value) => ({ ...value, employeeId: event.target.value }))}
-          placeholder="Employee"
-        />
-        <Input
           type="date"
           value={draftFilters.dateFrom}
           onChange={(event) => setDraftFilters((value) => ({ ...value, dateFrom: event.target.value }))}
@@ -189,7 +175,7 @@ export function ReportsPage() {
           value={draftFilters.dateTo}
           onChange={(event) => setDraftFilters((value) => ({ ...value, dateTo: event.target.value }))}
         />
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full lg:w-auto">
           Search
         </Button>
       </form>
@@ -295,9 +281,9 @@ export function ReportsPage() {
 
 function SummaryCard({ title, value }: { title: string; value: string | number }) {
   return (
-    <article className="min-w-0 overflow-hidden rounded-lg border border-border bg-surface p-4 shadow-card">
-      <p className="truncate text-xs font-bold uppercase tracking-[0.12em] text-mutedText">{title}</p>
-      <p className="mt-3 break-words text-[clamp(1.25rem,2vw,1.75rem)] font-bold leading-tight tracking-tight text-ink">
+    <article className="min-w-0 overflow-hidden rounded-lg border border-border bg-surface px-4 py-3 shadow-card">
+      <p className="truncate text-[11px] font-bold uppercase tracking-[0.12em] text-mutedText">{title}</p>
+      <p className="mt-2 truncate whitespace-nowrap text-[clamp(1.05rem,1.5vw,1.35rem)] font-bold leading-tight tracking-tight text-ink">
         {value}
       </p>
     </article>
