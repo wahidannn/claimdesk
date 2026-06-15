@@ -7,6 +7,7 @@ import { Modal } from '../components/ui/Modal';
 import { Textarea } from '../components/ui/Textarea';
 import { approveManagerClaim, getManagerClaim, rejectManagerClaim, requestClaimRevision } from '../features/approvals/api';
 import type { ReviewClaim } from '../features/approvals/types';
+import { ClaimCommentsThread } from '../features/comments/ClaimCommentsThread';
 import { downloadAttachment } from '../features/claims/api';
 import { formatCurrency } from '../features/claims/currency';
 import { StatusBadge } from '../features/claims/format';
@@ -212,6 +213,8 @@ export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
           )}
         </div>
       </section>
+
+      <ClaimCommentsThread claimId={claim.id} />
 
       <Modal open={pendingAction !== null} title={modalTitle(pendingAction)} onClose={closeModal}>
         <div className="space-y-4">

@@ -10,6 +10,8 @@ import com.claimdesk.entity.Role;
 import com.claimdesk.entity.User;
 import com.claimdesk.repository.NotificationRepository;
 import com.claimdesk.repository.UserRepository;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
@@ -147,6 +149,33 @@ public class NotificationService {
         );
     }
 
+    @Transactional
+    @CacheEvict(cacheNames = CacheConfig.NOTIFICATION_UNREAD_COUNT, allEntries = true)
+    public void notifyClaimCommentCreated(ExpenseClaim claim, User author) {
+        Map<Long, NotificationTarget> targets = new LinkedHashMap<>();
+        addTarget(targets, claim.getEmployee(), "/claims/" + claim.getId());
+
+        User manager = claim.getEmployee().getDepartment() == null ? null : claim.getEmployee().getDepartment().getManager();
+        addTarget(targets, manager, "/approvals/" + claim.getId());
+
+        if (claim.getStatus() == com.claimdesk.entity.ClaimStatus.MANAGER_APPROVED
+                || claim.getStatus() == com.claimdesk.entity.ClaimStatus.FINANCE_APPROVED
+                || claim.getStatus() == com.claimdesk.entity.ClaimStatus.PAID) {
+            userRepository.findByRoleAndActiveTrue(Role.FINANCE)
+                    .forEach(finance -> addTarget(targets, finance, "/finance-review/" + claim.getId()));
+        }
+
+        targets.values().stream()
+                .filter(target -> !target.recipient().getId().equals(author.getId()))
+                .forEach(target -> createNotification(
+                        target.recipient(),
+                        NotificationType.CLAIM_COMMENT_CREATED,
+                        "New claim comment",
+                        author.getName() + " commented on " + claim.getTitle() + ".",
+                        target.link()
+                ));
+    }
+
     private void notifyFinanceUsers(NotificationType type, String title, String message, String link) {
         userRepository.findByRoleAndActiveTrue(Role.FINANCE)
                 .forEach(finance -> createNotification(finance, type, title, message, link));
@@ -158,6 +187,14 @@ public class NotificationService {
         }
 
         notificationRepository.save(new Notification(recipient, type, title, message, link));
+    }
+
+    private void addTarget(Map<Long, NotificationTarget> targets, User recipient, String link) {
+        if (recipient == null || !recipient.isActive()) {
+            return;
+        }
+
+        targets.putIfAbsent(recipient.getId(), new NotificationTarget(recipient, link));
     }
 
     private User resolveUser(String email) {
@@ -176,5 +213,8 @@ public class NotificationService {
                 notification.getCreatedAt(),
                 notification.getReadAt()
         );
+    }
+
+    private record NotificationTarget(User recipient, String link) {
     }
 }

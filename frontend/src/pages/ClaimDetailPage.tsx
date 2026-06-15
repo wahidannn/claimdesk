@@ -3,6 +3,7 @@ import { ArrowLeft, Edit, FileText, Trash2, Upload } from 'lucide-react';
 import { ChangeEvent, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
+import { ClaimCommentsThread } from '../features/comments/ClaimCommentsThread';
 import {
   cancelClaim,
   deleteAttachment,
@@ -240,6 +241,8 @@ export function ClaimDetailPage() {
           )}
         </div>
       </section>
+
+      <ClaimCommentsThread claimId={claim.id} />
     </div>
   );
 }
