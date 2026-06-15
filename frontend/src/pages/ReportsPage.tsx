@@ -121,7 +121,7 @@ export function ReportsPage() {
       )}
 
       {summary && (
-        <section className="grid gap-4 md:grid-cols-5">
+        <section className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
           <SummaryCard title="Total Claims" value={summary.totalClaims} />
           <SummaryCard title="Total Amount" value={formatCurrency(summary.totalAmount)} />
           <SummaryCard title="Paid Amount" value={formatCurrency(summary.paidAmount)} />
@@ -130,9 +130,12 @@ export function ReportsPage() {
         </section>
       )}
 
-      <form className="grid gap-3 xl:grid-cols-[1.4fr_1fr_1fr_1fr_1fr_1fr_1fr_auto]" onSubmit={handleSearch}>
-        <div className="relative">
-          <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
+      <form
+        className="grid gap-3 rounded-lg border border-border bg-surface p-3 shadow-card sm:grid-cols-2 lg:grid-cols-[minmax(220px,1.4fr)_repeat(3,minmax(132px,1fr))] xl:grid-cols-[minmax(240px,1.7fr)_repeat(6,minmax(128px,1fr))_auto]"
+        onSubmit={handleSearch}
+      >
+        <div className="relative sm:col-span-2 lg:col-span-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-mutedText/70" size={17} />
           <Input
             className="pl-10"
             value={draftFilters.search}
@@ -167,14 +170,14 @@ export function ReportsPage() {
           min={1}
           value={draftFilters.departmentId}
           onChange={(event) => setDraftFilters((value) => ({ ...value, departmentId: event.target.value }))}
-          placeholder="Department ID"
+          placeholder="Department"
         />
         <Input
           type="number"
           min={1}
           value={draftFilters.employeeId}
           onChange={(event) => setDraftFilters((value) => ({ ...value, employeeId: event.target.value }))}
-          placeholder="Employee ID"
+          placeholder="Employee"
         />
         <Input
           type="date"
@@ -186,7 +189,7 @@ export function ReportsPage() {
           value={draftFilters.dateTo}
           onChange={(event) => setDraftFilters((value) => ({ ...value, dateTo: event.target.value }))}
         />
-        <Button type="submit" variant="secondary">
+        <Button type="submit" className="w-full">
           Search
         </Button>
       </form>
@@ -205,29 +208,29 @@ export function ReportsPage() {
               <Th>Employee</Th>
               <Th>Department</Th>
               <Th>Category</Th>
-              <Th>Amount</Th>
+              <Th className="whitespace-nowrap">Amount</Th>
               <Th>Status</Th>
-              <Th>Paid At</Th>
+              <Th className="w-36 whitespace-nowrap">Paid At</Th>
             </tr>
           </thead>
           <tbody>
             {reports.map((row) => (
               <tr key={row.claimId}>
-                <Td>
-                  <div className="font-medium">{row.title}</div>
-                  <div className="text-sm text-slate-500">{row.transactionDate}</div>
+                <Td className="min-w-52">
+                  <div className="line-clamp-1 font-semibold">{row.title}</div>
+                  <div className="text-xs text-mutedText">{row.transactionDate}</div>
                 </Td>
-                <Td>
-                  <div className="font-medium">{row.employeeName}</div>
-                  <div className="text-sm text-slate-500">{row.employeeEmail}</div>
+                <Td className="min-w-56">
+                  <div className="font-semibold">{row.employeeName}</div>
+                  <div className="text-xs text-mutedText">{row.employeeEmail}</div>
                 </Td>
                 <Td>{row.departmentName ?? '-'}</Td>
                 <Td>{row.categoryName}</Td>
-                <Td>{formatCurrency(row.amount)}</Td>
+                <Td className="whitespace-nowrap font-semibold">{formatCurrency(row.amount)}</Td>
                 <Td>
                   <StatusBadge status={row.status} />
                 </Td>
-                <Td>{row.paidAt ?? '-'}</Td>
+                <Td className="max-w-36 whitespace-nowrap text-sm">{formatShortDateTime(row.paidAt)}</Td>
               </tr>
             ))}
             {!reportsQuery.isLoading && reports.length === 0 && (
@@ -292,9 +295,11 @@ export function ReportsPage() {
 
 function SummaryCard({ title, value }: { title: string; value: string | number }) {
   return (
-    <article className="rounded-lg border border-border bg-surface p-4 shadow-card">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-mutedText">{title}</p>
-      <p className="mt-3 text-2xl font-bold tracking-tight text-ink">{value}</p>
+    <article className="min-w-0 overflow-hidden rounded-lg border border-border bg-surface p-4 shadow-card">
+      <p className="truncate text-xs font-bold uppercase tracking-[0.12em] text-mutedText">{title}</p>
+      <p className="mt-3 break-words text-[clamp(1.25rem,2vw,1.75rem)] font-bold leading-tight tracking-tight text-ink">
+        {value}
+      </p>
     </article>
   );
 }
@@ -330,4 +335,22 @@ function downloadBlob(blob: Blob, filename: string) {
 
 function todayStamp() {
   return new Date().toISOString().slice(0, 10).replace(/-/g, '');
+}
+
+function formatShortDateTime(value: string | null | undefined) {
+  if (!value) {
+    return '-';
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value.slice(0, 10);
+  }
+
+  return new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
 }

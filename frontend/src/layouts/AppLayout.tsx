@@ -106,14 +106,14 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-muted text-ink">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-border bg-sidebar px-4 py-5 md:block">
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-accentSoft text-accent">
-            <ReceiptText size={19} />
+      <aside className="fixed inset-y-0 left-0 hidden w-56 border-r border-border bg-sidebar px-3 py-5 md:block">
+        <div className="mb-8 flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-accentSoft text-accent">
+            <ReceiptText size={17} />
           </div>
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-mutedText">ClaimDesk</p>
-            <h1 className="text-base font-bold text-ink">Expense Approval</h1>
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-mutedText">ClaimDesk</p>
+            <h1 className="text-sm font-bold text-ink">Expense Approval</h1>
           </div>
         </div>
         <nav className="space-y-1">
@@ -123,12 +123,12 @@ export function AppLayout() {
               to={item.to}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-mutedText transition hover:bg-white/70 hover:text-ink',
+                  'flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-semibold text-mutedText transition hover:bg-white/70 hover:text-ink',
                   isActive && 'bg-accentSoft text-accent shadow-sm',
                 )
               }
             >
-              <item.icon size={18} />
+              <item.icon size={17} />
               <span className="flex-1">{item.label}</span>
               {navBadgeCount(item.to, user.role, summary) > 0 && (
                 <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-white">
@@ -140,8 +140,8 @@ export function AppLayout() {
         </nav>
       </aside>
 
-      <div className="md:pl-64">
-        <header className="sticky top-0 z-10 border-b border-border/70 bg-muted/95 px-4 py-4 backdrop-blur md:px-7">
+      <div className="md:pl-56">
+        <header className="sticky top-0 z-10 border-b border-border/70 bg-muted/95 px-4 py-4 backdrop-blur md:px-6">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-mutedText">{roleLabels[user.role]}</p>
@@ -205,7 +205,7 @@ export function AppLayout() {
             </div>
           </div>
         </header>
-        <main className="px-4 py-5 md:px-7">
+        <main className="px-4 py-5 md:px-6">
           <Outlet />
         </main>
       </div>

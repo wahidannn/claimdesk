@@ -6,7 +6,7 @@ export function Table({ className, ...props }: TableHTMLAttributes<HTMLTableElem
     <div className="w-full overflow-x-auto">
       <table
         className={cn(
-          'w-full border-collapse text-left text-sm [&_tbody_tr]:transition-colors [&_tbody_tr:hover]:bg-accentSoft/45 [&_tbody_tr:last-child_td]:border-b-0',
+          'w-full border-collapse text-left text-sm leading-5 [&_tbody_tr]:transition-colors [&_tbody_tr:hover]:bg-accentSoft/45 [&_tbody_tr:last-child_td]:border-b-0',
           className,
         )}
         {...props}
@@ -19,7 +19,7 @@ export function Th({ className, ...props }: ThHTMLAttributes<HTMLTableCellElemen
   return (
     <th
       className={cn(
-        'border-b border-border bg-sidebar/70 px-5 py-3 text-xs font-bold uppercase tracking-[0.1em] text-mutedText',
+        'border-b border-border bg-sidebar/70 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.1em] text-mutedText',
         className,
       )}
       {...props}
@@ -28,5 +28,5 @@ export function Th({ className, ...props }: ThHTMLAttributes<HTMLTableCellElemen
 }
 
 export function Td({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn('border-b border-border px-5 py-3.5 text-ink', className)} {...props} />;
+  return <td className={cn('border-b border-border px-4 py-2.5 align-middle text-ink', className)} {...props} />;
 }

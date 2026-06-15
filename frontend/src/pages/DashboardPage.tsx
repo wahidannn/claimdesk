@@ -595,9 +595,11 @@ function EmployeeDashboardSkeleton() {
 
 function SummaryCard({ title, value }: { title: string; value: string | number }) {
   return (
-    <article className="rounded-lg border border-border bg-surface p-4 shadow-card">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-mutedText">{title}</p>
-      <p className="mt-3 text-2xl font-bold tracking-tight text-ink">{value}</p>
+    <article className="min-w-0 overflow-hidden rounded-lg border border-border bg-surface p-4 shadow-card">
+      <p className="truncate text-xs font-bold uppercase tracking-[0.12em] text-mutedText">{title}</p>
+      <p className="mt-3 break-words text-[clamp(1.25rem,2vw,1.75rem)] font-bold leading-tight tracking-tight text-ink">
+        {value}
+      </p>
     </article>
   );
 }
