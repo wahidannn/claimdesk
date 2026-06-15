@@ -187,7 +187,7 @@ export function ReportsPage() {
         <Breakdown title="By Department" items={summary?.byDepartment ?? []} />
       </section>
 
-      <div className="overflow-hidden rounded-lg border border-border bg-surface shadow-card">
+      <div className="app-scrollbar overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-surface shadow-card">
         <Table>
           <thead>
             <tr>

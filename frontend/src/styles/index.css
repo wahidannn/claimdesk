@@ -27,3 +27,28 @@ body {
   background: #cceee2;
   color: #17352e;
 }
+
+.app-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #b9c7c2 #eef3f1;
+}
+
+.app-scrollbar::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.app-scrollbar::-webkit-scrollbar-track {
+  background: #eef3f1;
+  border-radius: 999px;
+}
+
+.app-scrollbar::-webkit-scrollbar-thumb {
+  background: #b9c7c2;
+  border: 2px solid #eef3f1;
+  border-radius: 999px;
+}
+
+.app-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #8fa39c;
+}
