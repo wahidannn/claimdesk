@@ -30,25 +30,31 @@ body {
 
 .app-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #b9c7c2 #eef3f1;
+  scrollbar-color: #079669 transparent;
 }
 
 .app-scrollbar::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
+  height: 10px;
+  width: 10px;
 }
 
 .app-scrollbar::-webkit-scrollbar-track {
-  background: #eef3f1;
+  background: transparent;
   border-radius: 999px;
 }
 
 .app-scrollbar::-webkit-scrollbar-thumb {
-  background: #b9c7c2;
-  border: 2px solid #eef3f1;
+  background: #079669;
+  border: 3px solid #ffffff;
   border-radius: 999px;
 }
 
 .app-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #8fa39c;
+  background: #067a57;
+}
+
+.app-scrollbar::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
 }
