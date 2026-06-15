@@ -1,5 +1,6 @@
 package com.claimdesk.service;
 
+import com.claimdesk.config.CacheConfig;
 import com.claimdesk.dto.ClaimReportBreakdownResponse;
 import com.claimdesk.dto.ClaimReportRowResponse;
 import com.claimdesk.dto.ClaimReportSummaryResponse;
@@ -20,6 +21,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -69,6 +71,10 @@ public class ReportService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(
+            cacheNames = CacheConfig.CLAIM_REPORT_SUMMARY,
+            key = "T(java.util.Objects).hash(#actorEmail, #search, #status, #departmentId, #employeeId, #categoryId, #dateFrom, #dateTo)"
+    )
     public ClaimReportSummaryResponse getSummary(
             String actorEmail,
             String search,

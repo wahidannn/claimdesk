@@ -1,5 +1,7 @@
 package com.claimdesk.service;
 
+import com.claimdesk.config.CacheConfig;
+import com.claimdesk.dto.ActiveCategoryResponse;
 import com.claimdesk.dto.CategoryRequest;
 import com.claimdesk.dto.CategoryResponse;
 import com.claimdesk.dto.PagedResponse;
@@ -7,6 +9,9 @@ import com.claimdesk.entity.AuditAction;
 import com.claimdesk.entity.AuditResourceType;
 import com.claimdesk.entity.ExpenseCategory;
 import com.claimdesk.repository.ExpenseCategoryRepository;
+import java.util.List;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -36,7 +41,30 @@ public class ExpenseCategoryService {
         return toResponse(findCategory(id));
     }
 
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheConfig.ACTIVE_CATEGORIES, key = "'all'")
+    public List<ActiveCategoryResponse> listActiveCategories() {
+        return categoryRepository.findByActiveTrueOrderByNameAsc().stream()
+                .map(category -> new ActiveCategoryResponse(
+                        category.getId(),
+                        category.getName(),
+                        category.getDescription()
+                ))
+                .toList();
+    }
+
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.ACTIVE_CATEGORIES,
+                    CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.ADMIN_DASHBOARD,
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.FINANCE_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public CategoryResponse createCategory(String actorEmail, CategoryRequest request) {
         if (categoryRepository.existsByNameIgnoreCase(request.name())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Category name already exists");
@@ -61,6 +89,17 @@ public class ExpenseCategoryService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.ACTIVE_CATEGORIES,
+                    CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.ADMIN_DASHBOARD,
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.FINANCE_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public CategoryResponse updateCategory(String actorEmail, Long id, CategoryRequest request) {
         ExpenseCategory category = findCategory(id);
         if (categoryRepository.existsByNameIgnoreCaseAndIdNot(request.name(), id)) {
@@ -80,6 +119,17 @@ public class ExpenseCategoryService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.ACTIVE_CATEGORIES,
+                    CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.ADMIN_DASHBOARD,
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.FINANCE_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public CategoryResponse updateStatus(String actorEmail, Long id, boolean active) {
         ExpenseCategory category = findCategory(id);
         category.setActive(active);

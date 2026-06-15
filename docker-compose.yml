@@ -16,5 +16,11 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: claimdesk-redis
+    ports:
+      - "6379:6379"
+
 volumes:
   claimdesk-postgres-data:

@@ -1,5 +1,6 @@
 package com.claimdesk.service;
 
+import com.claimdesk.config.CacheConfig;
 import com.claimdesk.dto.NotificationResponse;
 import com.claimdesk.dto.PagedResponse;
 import com.claimdesk.entity.ExpenseClaim;
@@ -9,6 +10,8 @@ import com.claimdesk.entity.Role;
 import com.claimdesk.entity.User;
 import com.claimdesk.repository.NotificationRepository;
 import com.claimdesk.repository.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -37,12 +40,14 @@ public class NotificationService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheConfig.NOTIFICATION_UNREAD_COUNT, key = "#email")
     public long countUnread(String email) {
         User user = resolveUser(email);
         return notificationRepository.countByRecipientIdAndReadFalse(user.getId());
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.NOTIFICATION_UNREAD_COUNT, allEntries = true)
     public NotificationResponse markRead(String email, Long id) {
         User user = resolveUser(email);
         Notification notification = notificationRepository.findByIdAndRecipientId(id, user.getId())
@@ -52,6 +57,7 @@ public class NotificationService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.NOTIFICATION_UNREAD_COUNT, allEntries = true)
     public void markAllRead(String email) {
         User user = resolveUser(email);
         notificationRepository.findByRecipientIdAndReadFalse(user.getId())
@@ -59,6 +65,7 @@ public class NotificationService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.NOTIFICATION_UNREAD_COUNT, allEntries = true)
     public void notifyClaimSubmitted(ExpenseClaim claim) {
         User manager = claim.getEmployee().getDepartment() == null ? null : claim.getEmployee().getDepartment().getManager();
         if (manager == null || !manager.isActive()) {
@@ -75,6 +82,7 @@ public class NotificationService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.NOTIFICATION_UNREAD_COUNT, allEntries = true)
     public void notifyManagerApproved(ExpenseClaim claim) {
         createNotification(
                 claim.getEmployee(),
@@ -92,6 +100,7 @@ public class NotificationService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.NOTIFICATION_UNREAD_COUNT, allEntries = true)
     public void notifyManagerRejected(ExpenseClaim claim) {
         createNotification(
                 claim.getEmployee(),
@@ -103,6 +112,7 @@ public class NotificationService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.NOTIFICATION_UNREAD_COUNT, allEntries = true)
     public void notifyFinanceApproved(ExpenseClaim claim) {
         createNotification(
                 claim.getEmployee(),
@@ -114,6 +124,7 @@ public class NotificationService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.NOTIFICATION_UNREAD_COUNT, allEntries = true)
     public void notifyPaid(ExpenseClaim claim) {
         createNotification(
                 claim.getEmployee(),

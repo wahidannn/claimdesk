@@ -1,5 +1,6 @@
 package com.claimdesk.service;
 
+import com.claimdesk.config.CacheConfig;
 import com.claimdesk.dto.DepartmentRequest;
 import com.claimdesk.dto.DepartmentResponse;
 import com.claimdesk.dto.PagedResponse;
@@ -11,6 +12,7 @@ import com.claimdesk.entity.Role;
 import com.claimdesk.entity.User;
 import com.claimdesk.repository.DepartmentRepository;
 import com.claimdesk.repository.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -47,6 +49,14 @@ public class DepartmentService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.ADMIN_DASHBOARD,
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public DepartmentResponse createDepartment(String actorEmail, DepartmentRequest request) {
         if (departmentRepository.existsByNameIgnoreCase(request.name())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Department name already exists");
@@ -71,6 +81,14 @@ public class DepartmentService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.ADMIN_DASHBOARD,
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public DepartmentResponse updateDepartment(String actorEmail, Long id, DepartmentRequest request) {
         Department department = findDepartment(id);
         if (departmentRepository.existsByNameIgnoreCaseAndIdNot(request.name(), id)) {
@@ -90,6 +108,14 @@ public class DepartmentService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.ADMIN_DASHBOARD,
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public DepartmentResponse updateStatus(String actorEmail, Long id, boolean active) {
         Department department = findDepartment(id);
         department.setActive(active);

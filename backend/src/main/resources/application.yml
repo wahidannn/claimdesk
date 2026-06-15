@@ -3,6 +3,11 @@ spring:
     name: claimdesk-api
   profiles:
     default: local
+  cache:
+    type: ${CACHE_TYPE:redis}
+  data:
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379}
 
 server:
   port: 8080
@@ -14,6 +19,11 @@ springdoc:
     path: /swagger-ui.html
 
 app:
+  cache:
+    ttl:
+      dashboard-seconds: ${CACHE_TTL_DASHBOARD_SECONDS:300}
+      reference-seconds: ${CACHE_TTL_REFERENCE_SECONDS:600}
+      notification-seconds: ${CACHE_TTL_NOTIFICATION_SECONDS:60}
   cors:
     allowed-origin: http://localhost:5173
   security:

@@ -1,5 +1,6 @@
 package com.claimdesk.service;
 
+import com.claimdesk.config.CacheConfig;
 import com.claimdesk.dto.ClaimCategoryResponse;
 import com.claimdesk.dto.ClaimRequest;
 import com.claimdesk.dto.ClaimResponse;
@@ -16,6 +17,7 @@ import com.claimdesk.repository.ExpenseCategoryRepository;
 import com.claimdesk.repository.ExpenseClaimRepository;
 import com.claimdesk.repository.UserRepository;
 import java.time.LocalDate;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -71,6 +73,10 @@ public class ExpenseClaimService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {CacheConfig.EMPLOYEE_DASHBOARD, CacheConfig.CLAIM_REPORT_SUMMARY},
+            allEntries = true
+    )
     public ClaimResponse createClaim(String email, ClaimRequest request) {
         User employee = resolveEmployee(email);
         ExpenseCategory category = resolveActiveCategory(request.categoryId());
@@ -98,6 +104,10 @@ public class ExpenseClaimService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {CacheConfig.EMPLOYEE_DASHBOARD, CacheConfig.CLAIM_REPORT_SUMMARY},
+            allEntries = true
+    )
     public ClaimResponse updateClaim(String email, Long id, ClaimRequest request) {
         User employee = resolveEmployee(email);
         ExpenseClaim claim = findOwnedClaim(id, employee);
@@ -127,6 +137,14 @@ public class ExpenseClaimService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public ClaimResponse submitClaim(String email, Long id) {
         User employee = resolveEmployee(email);
         ExpenseClaim claim = findOwnedClaim(id, employee);
@@ -148,6 +166,14 @@ public class ExpenseClaimService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public ClaimResponse cancelClaim(String email, Long id) {
         User employee = resolveEmployee(email);
         ExpenseClaim claim = findOwnedClaim(id, employee);

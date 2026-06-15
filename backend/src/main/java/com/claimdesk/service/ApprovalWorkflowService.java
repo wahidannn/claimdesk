@@ -1,5 +1,6 @@
 package com.claimdesk.service;
 
+import com.claimdesk.config.CacheConfig;
 import com.claimdesk.dto.ApprovalNoteResponse;
 import com.claimdesk.dto.AttachmentResponse;
 import com.claimdesk.dto.ClaimCategoryResponse;
@@ -25,6 +26,7 @@ import com.claimdesk.repository.UserRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -91,6 +93,15 @@ public class ApprovalWorkflowService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.FINANCE_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public ReviewClaimResponse managerApprove(String email, Long id, String note) {
         User manager = resolveUser(email, Role.MANAGER);
         ExpenseClaim claim = findClaim(id);
@@ -114,6 +125,14 @@ public class ApprovalWorkflowService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public ReviewClaimResponse managerReject(String email, Long id, String note) {
         User manager = resolveUser(email, Role.MANAGER);
         ExpenseClaim claim = findClaim(id);
@@ -172,6 +191,14 @@ public class ApprovalWorkflowService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.FINANCE_DASHBOARD,
+                    CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public ReviewClaimResponse financeApprove(String email, Long id, String note) {
         User finance = resolveUser(email, Role.FINANCE);
         ExpenseClaim claim = findClaim(id);
@@ -194,6 +221,14 @@ public class ApprovalWorkflowService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.FINANCE_DASHBOARD,
+                    CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public ReviewClaimResponse markPaid(String email, Long id, String note) {
         User finance = resolveUser(email, Role.FINANCE);
         ExpenseClaim claim = findClaim(id);

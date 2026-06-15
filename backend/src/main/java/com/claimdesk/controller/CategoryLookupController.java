@@ -1,7 +1,7 @@
 package com.claimdesk.controller;
 
 import com.claimdesk.dto.ActiveCategoryResponse;
-import com.claimdesk.repository.ExpenseCategoryRepository;
+import com.claimdesk.service.ExpenseCategoryService;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,20 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/categories")
 public class CategoryLookupController {
 
-    private final ExpenseCategoryRepository categoryRepository;
+    private final ExpenseCategoryService categoryService;
 
-    public CategoryLookupController(ExpenseCategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
+    public CategoryLookupController(ExpenseCategoryService categoryService) {
+        this.categoryService = categoryService;
     }
 
     @GetMapping("/active")
     public List<ActiveCategoryResponse> listActiveCategories() {
-        return categoryRepository.findByActiveTrueOrderByNameAsc().stream()
-                .map(category -> new ActiveCategoryResponse(
-                        category.getId(),
-                        category.getName(),
-                        category.getDescription()
-                ))
-                .toList();
+        return categoryService.listActiveCategories();
     }
 }

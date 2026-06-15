@@ -1,6 +1,6 @@
 # ClaimDesk
 
-ClaimDesk adalah aplikasi fullstack untuk expense approval dan reimbursement. Repository ini memakai struktur monorepo sederhana dengan backend Spring Boot, frontend React, dan PostgreSQL lokal lewat Docker Compose.
+ClaimDesk adalah aplikasi fullstack untuk expense approval dan reimbursement. Repository ini memakai struktur monorepo sederhana dengan backend Spring Boot, frontend React, PostgreSQL lokal, dan Redis cache lewat Docker Compose.
 
 ## Struktur Project
 
@@ -22,7 +22,7 @@ claimdesk/
 
 ## Menjalankan Lokal
 
-Start database:
+Start database dan Redis:
 
 ```bash
 docker compose up -d
@@ -79,6 +79,28 @@ Endpoint auth:
 
 Salin nilai dari `.env.example` sesuai kebutuhan. Backend membaca konfigurasi database dari environment variable, sedangkan frontend memakai `VITE_API_BASE_URL`.
 
+## Redis Cache
+
+Redis dipakai sebagai cache backend untuk data read-heavy seperti dashboard, active categories, notification unread count, dan report summary. Redis bukan source of truth dan tidak dipakai untuk session/auth; auth tetap JWT HttpOnly cookie.
+
+Local default:
+
+```text
+CACHE_TYPE=redis
+REDIS_URL=redis://localhost:6379
+CACHE_TTL_DASHBOARD_SECONDS=300
+CACHE_TTL_REFERENCE_SECONDS=600
+CACHE_TTL_NOTIFICATION_SECONDS=60
+```
+
+Jalankan Redis lokal bersama PostgreSQL:
+
+```bash
+docker compose up -d
+```
+
+Untuk production, set `REDIS_URL` dari provider Redis eksternal seperti Upstash atau Redis Cloud. Gunakan `rediss://` jika provider Redis memakai TLS.
+
 ## Receipt Storage
 
 Secara default receipt disimpan secara lokal di `backend/storage/receipts` lewat:
@@ -133,6 +155,11 @@ SUPABASE_URL=https://xxxx.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=...
 SUPABASE_STORAGE_BUCKET=receipts
 SUPABASE_SIGNED_URL_TTL_SECONDS=300
+CACHE_TYPE=redis
+REDIS_URL=rediss://default:password@redis-provider-host:6379
+CACHE_TTL_DASHBOARD_SECONDS=300
+CACHE_TTL_REFERENCE_SECONDS=600
+CACHE_TTL_NOTIFICATION_SECONDS=60
 OPENAPI_ENABLED=false
 JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75
 ```
@@ -212,6 +239,7 @@ COOKIE_SAME_SITE=None
 - `FRONTEND_ORIGIN` sama persis dengan domain frontend.
 - Cookie `access_token` muncul sebagai HttpOnly dan Secure setelah login.
 - Jika frontend/backend beda domain, gunakan `COOKIE_SECURE=true` dan `COOKIE_SAME_SITE=None`.
+- Redis production terhubung lewat `REDIS_URL`.
 - Upload receipt masuk ke Supabase bucket `receipts`.
 - View dan delete receipt berjalan.
 - Report CSV bisa didownload.

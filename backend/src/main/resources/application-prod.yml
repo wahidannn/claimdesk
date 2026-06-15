@@ -2,6 +2,11 @@ server:
   port: ${PORT:8080}
 
 spring:
+  cache:
+    type: ${CACHE_TYPE:redis}
+  data:
+    redis:
+      url: ${REDIS_URL}
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}}
     username: ${DB_USERNAME:}
@@ -24,6 +29,11 @@ springdoc:
     enabled: ${OPENAPI_ENABLED:false}
 
 app:
+  cache:
+    ttl:
+      dashboard-seconds: ${CACHE_TTL_DASHBOARD_SECONDS:300}
+      reference-seconds: ${CACHE_TTL_REFERENCE_SECONDS:600}
+      notification-seconds: ${CACHE_TTL_NOTIFICATION_SECONDS:60}
   cors:
     allowed-origin: ${FRONTEND_ORIGIN}
   security:

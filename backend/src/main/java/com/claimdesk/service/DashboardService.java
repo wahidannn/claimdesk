@@ -1,5 +1,6 @@
 package com.claimdesk.service;
 
+import com.claimdesk.config.CacheConfig;
 import com.claimdesk.dto.AdminDashboardResponse;
 import com.claimdesk.dto.AdminDashboardSummaryResponse;
 import com.claimdesk.dto.AuditLogResponse;
@@ -32,6 +33,7 @@ import java.time.ZoneOffset;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -93,6 +95,7 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheConfig.EMPLOYEE_DASHBOARD, key = "#email")
     public EmployeeDashboardResponse getEmployeeDashboard(String email) {
         User user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
@@ -125,6 +128,7 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheConfig.ADMIN_DASHBOARD, key = "#email")
     public AdminDashboardResponse getAdminDashboard(String email) {
         User user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
@@ -158,6 +162,7 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheConfig.MANAGER_DASHBOARD, key = "#email")
     public ManagerDashboardResponse getManagerDashboard(String email) {
         User user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
@@ -187,6 +192,7 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheConfig.FINANCE_DASHBOARD, key = "#email")
     public FinanceDashboardResponse getFinanceDashboard(String email) {
         User user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));

@@ -1,5 +1,6 @@
 package com.claimdesk.service;
 
+import com.claimdesk.config.CacheConfig;
 import com.claimdesk.dto.CreateUserRequest;
 import com.claimdesk.dto.PagedResponse;
 import com.claimdesk.dto.SimpleDepartmentResponse;
@@ -12,6 +13,7 @@ import com.claimdesk.entity.Role;
 import com.claimdesk.entity.User;
 import com.claimdesk.repository.DepartmentRepository;
 import com.claimdesk.repository.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -52,6 +54,15 @@ public class UserManagementService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.ADMIN_DASHBOARD,
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.FINANCE_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public UserResponse createUser(String actorEmail, CreateUserRequest request) {
         if (userRepository.existsByEmailIgnoreCase(request.email())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
@@ -80,6 +91,15 @@ public class UserManagementService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.ADMIN_DASHBOARD,
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.FINANCE_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public UserResponse updateUser(String actorEmail, Long id, UpdateUserRequest request) {
         User user = findUser(id);
         if (userRepository.existsByEmailIgnoreCaseAndIdNot(request.email(), id)) {
@@ -111,6 +131,15 @@ public class UserManagementService {
     }
 
     @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.ADMIN_DASHBOARD,
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.FINANCE_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
     public UserResponse updateStatus(String actorEmail, Long id, boolean active) {
         User user = findUser(id);
         user.setActive(active);
