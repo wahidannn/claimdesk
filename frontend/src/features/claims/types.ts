@@ -3,6 +3,8 @@ import type { ListParams } from '../../lib/api-types';
 export type ClaimStatus =
   | 'DRAFT'
   | 'SUBMITTED'
+  | 'REVISION_REQUESTED'
+  | 'REVISED'
   | 'MANAGER_APPROVED'
   | 'MANAGER_REJECTED'
   | 'FINANCE_APPROVED'
@@ -31,6 +33,7 @@ export type ExpenseClaim = {
   submittedAt: string | null;
   category: ClaimCategory;
   employee: ClaimEmployee;
+  latestRevisionNote: string | null;
   createdAt: string;
   updatedAt: string;
 };

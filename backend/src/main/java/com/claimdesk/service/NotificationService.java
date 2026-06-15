@@ -113,6 +113,18 @@ public class NotificationService {
 
     @Transactional
     @CacheEvict(cacheNames = CacheConfig.NOTIFICATION_UNREAD_COUNT, allEntries = true)
+    public void notifyRevisionRequested(ExpenseClaim claim) {
+        createNotification(
+                claim.getEmployee(),
+                NotificationType.CLAIM_REVISION_REQUESTED,
+                "Claim revision requested",
+                claim.getTitle() + " needs revision.",
+                "/claims/" + claim.getId()
+        );
+    }
+
+    @Transactional
+    @CacheEvict(cacheNames = CacheConfig.NOTIFICATION_UNREAD_COUNT, allEntries = true)
     public void notifyFinanceApproved(ExpenseClaim claim) {
         createNotification(
                 claim.getEmployee(),

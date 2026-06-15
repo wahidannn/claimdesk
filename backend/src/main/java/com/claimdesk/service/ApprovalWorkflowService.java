@@ -160,6 +160,42 @@ public class ApprovalWorkflowService {
         return toReviewResponse(claim);
     }
 
+    @Transactional
+    @CacheEvict(
+            cacheNames = {
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
+            allEntries = true
+    )
+    public ReviewClaimResponse requestRevision(String email, Long id, String note) {
+        User manager = resolveUser(email, Role.MANAGER);
+        ExpenseClaim claim = findClaim(id);
+        validateManagerClaimAccess(manager, claim);
+        if (claim.getStatus() != ClaimStatus.SUBMITTED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only submitted claims can be sent for revision");
+        }
+
+        String normalizedNote = normalizeNote(note);
+        if (normalizedNote == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Revision note is required");
+        }
+
+        claim.requestRevision();
+        approvalNoteRepository.save(new ApprovalNote(claim, manager, ApprovalAction.REVISION_REQUESTED, normalizedNote));
+        notificationService.notifyRevisionRequested(claim);
+        auditLogService.record(
+                manager.getEmail(),
+                AuditAction.CLAIM_REVISION_REQUESTED,
+                AuditResourceType.CLAIM,
+                claim.getId(),
+                manager.getName() + " requested revision for claim " + claim.getTitle() + ".",
+                "{\"status\":\"" + claim.getStatus() + "\"}"
+        );
+        return toReviewResponse(claim);
+    }
+
     @Transactional(readOnly = true)
     public PagedResponse<ReviewClaimResponse> listFinanceClaims(
             String email,

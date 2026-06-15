@@ -2,6 +2,7 @@ import type { PagedResponse } from '../../lib/api-types';
 
 export type NotificationType =
   | 'CLAIM_SUBMITTED'
+  | 'CLAIM_REVISION_REQUESTED'
   | 'CLAIM_MANAGER_APPROVED'
   | 'CLAIM_MANAGER_REJECTED'
   | 'CLAIM_FINANCE_APPROVED'

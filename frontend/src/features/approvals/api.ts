@@ -20,3 +20,8 @@ export async function rejectManagerClaim(id: number, request: ApprovalNoteReques
   const response = await apiClient.post<ReviewClaim>(`/manager/claims/${id}/reject`, request);
   return response.data;
 }
+
+export async function requestClaimRevision(id: number, request: ApprovalNoteRequest) {
+  const response = await apiClient.post<ReviewClaim>(`/manager/claims/${id}/request-revision`, request);
+  return response.data;
+}

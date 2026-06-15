@@ -30,6 +30,11 @@ public class ExpenseAttachmentService {
 
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of("image/jpeg", "image/png", "application/pdf");
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of(".jpg", ".jpeg", ".png", ".pdf");
+    private static final Set<ClaimStatus> MUTABLE_ATTACHMENT_STATUSES = Set.of(
+            ClaimStatus.DRAFT,
+            ClaimStatus.REVISION_REQUESTED,
+            ClaimStatus.REVISED
+    );
 
     private final ExpenseAttachmentRepository attachmentRepository;
     private final ExpenseClaimRepository claimRepository;
@@ -65,8 +70,8 @@ public class ExpenseAttachmentService {
     @Transactional
     public AttachmentResponse uploadAttachment(String email, Long claimId, MultipartFile file) {
         ExpenseClaim claim = resolveOwnedClaim(email, claimId);
-        if (claim.getStatus() != ClaimStatus.DRAFT) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Attachments can only be uploaded to draft claims");
+        if (!MUTABLE_ATTACHMENT_STATUSES.contains(claim.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Attachments can only be uploaded to draft or revision claims");
         }
 
         validateFile(file);
@@ -121,8 +126,8 @@ public class ExpenseAttachmentService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Attachment not found");
         }
 
-        if (attachment.getClaim().getStatus() != ClaimStatus.DRAFT) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Attachments can only be deleted from draft claims");
+        if (!MUTABLE_ATTACHMENT_STATUSES.contains(attachment.getClaim().getStatus())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Attachments can only be deleted from draft or revision claims");
         }
 
         Long claimId = attachment.getClaim().getId();

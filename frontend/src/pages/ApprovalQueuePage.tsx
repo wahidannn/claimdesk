@@ -8,7 +8,7 @@ import { Modal } from '../components/ui/Modal';
 import { Select } from '../components/ui/Select';
 import { Table, Td, Th } from '../components/ui/Table';
 import { Textarea } from '../components/ui/Textarea';
-import { approveManagerClaim, listManagerClaims, rejectManagerClaim } from '../features/approvals/api';
+import { approveManagerClaim, listManagerClaims, rejectManagerClaim, requestClaimRevision } from '../features/approvals/api';
 import { listActiveCategories } from '../features/claims/api';
 import { formatCurrency } from '../features/claims/currency';
 import { StatusBadge } from '../features/claims/format';
@@ -18,7 +18,7 @@ import { getApiErrorMessage } from '../lib/api-error';
 type PendingAction = {
   id: number;
   title: string;
-  action: 'approve' | 'reject';
+  action: 'approve' | 'reject' | 'revision';
 };
 
 export function ApprovalQueuePage() {
@@ -57,11 +57,23 @@ export function ApprovalQueuePage() {
 
   const actionMutation = useMutation({
     mutationFn: ({ id, action, note }: PendingAction & { note: string }) =>
-      action === 'approve' ? approveManagerClaim(id, { note }) : rejectManagerClaim(id, { note }),
+      action === 'approve'
+        ? approveManagerClaim(id, { note })
+        : action === 'revision'
+          ? requestClaimRevision(id, { note })
+          : rejectManagerClaim(id, { note }),
     onSuccess: async (_claim, variables) => {
-      setNotice(variables.action === 'approve' ? 'Claim berhasil diapprove.' : 'Claim berhasil direject.');
+      setNotice(
+        variables.action === 'approve'
+          ? 'Claim berhasil diapprove.'
+          : variables.action === 'revision'
+            ? 'Revision request berhasil dikirim.'
+            : 'Claim berhasil direject.'
+      );
       closeModal();
       await queryClient.invalidateQueries({ queryKey: ['manager-claims'] });
+      await queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      await queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 
@@ -193,6 +205,13 @@ export function ApprovalQueuePage() {
                         <Button
                           type="button"
                           variant="ghost"
+                          onClick={() => openModal({ id: claim.id, title: claim.title, action: 'revision' })}
+                        >
+                          Request Revision
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
                           onClick={() => openModal({ id: claim.id, title: claim.title, action: 'reject' })}
                         >
                           Reject
@@ -218,7 +237,13 @@ export function ApprovalQueuePage() {
 
       <Modal
         open={pendingAction !== null}
-        title={pendingAction?.action === 'reject' ? 'Reject Claim' : 'Approve Claim'}
+        title={
+          pendingAction?.action === 'reject'
+            ? 'Reject Claim'
+            : pendingAction?.action === 'revision'
+              ? 'Request Revision'
+              : 'Approve Claim'
+        }
         onClose={closeModal}
       >
         <div className="space-y-4">
@@ -226,7 +251,7 @@ export function ApprovalQueuePage() {
           <Textarea
             value={note}
             onChange={(event) => setNote(event.target.value)}
-            placeholder={pendingAction?.action === 'reject' ? 'Reject note is required' : 'Optional note'}
+            placeholder={pendingAction?.action === 'approve' ? 'Optional note' : 'Note is required'}
           />
           {actionMutation.error && (
             <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -240,7 +265,7 @@ export function ApprovalQueuePage() {
             <Button
               type="button"
               onClick={submitAction}
-              disabled={actionMutation.isPending || (pendingAction?.action === 'reject' && !note.trim())}
+              disabled={actionMutation.isPending || (pendingAction?.action !== 'approve' && !note.trim())}
             >
               Submit
             </Button>

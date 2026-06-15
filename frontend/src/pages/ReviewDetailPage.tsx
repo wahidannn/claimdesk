@@ -5,7 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { Textarea } from '../components/ui/Textarea';
-import { approveManagerClaim, getManagerClaim, rejectManagerClaim } from '../features/approvals/api';
+import { approveManagerClaim, getManagerClaim, rejectManagerClaim, requestClaimRevision } from '../features/approvals/api';
 import type { ReviewClaim } from '../features/approvals/types';
 import { downloadAttachment } from '../features/claims/api';
 import { formatCurrency } from '../features/claims/currency';
@@ -15,7 +15,7 @@ import { approveFinanceClaim, getFinanceClaim, markClaimPaid } from '../features
 import { getApiErrorMessage } from '../lib/api-error';
 
 type ReviewMode = 'manager' | 'finance';
-type PendingAction = 'manager-approve' | 'manager-reject' | 'finance-approve' | 'mark-paid';
+type PendingAction = 'manager-approve' | 'manager-reject' | 'manager-revision' | 'finance-approve' | 'mark-paid';
 
 export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
   const params = useParams();
@@ -108,6 +108,9 @@ export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
               </Button>
               <Button type="button" variant="ghost" onClick={() => setPendingAction('manager-reject')}>
                 Reject
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setPendingAction('manager-revision')}>
+                Request Revision
               </Button>
             </>
           )}
@@ -215,7 +218,13 @@ export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
           <Textarea
             value={note}
             onChange={(event) => setNote(event.target.value)}
-            placeholder={pendingAction === 'manager-reject' ? 'Reject note is required' : 'Optional note'}
+            placeholder={
+              pendingAction === 'manager-reject'
+                ? 'Reject note is required'
+                : pendingAction === 'manager-revision'
+                  ? 'Revision note is required'
+                  : 'Optional note'
+            }
           />
           {actionMutation.error && (
             <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -229,7 +238,10 @@ export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
             <Button
               type="button"
               onClick={submitAction}
-              disabled={actionMutation.isPending || (pendingAction === 'manager-reject' && !note.trim())}
+              disabled={
+                actionMutation.isPending ||
+                ((pendingAction === 'manager-reject' || pendingAction === 'manager-revision') && !note.trim())
+              }
             >
               Submit
             </Button>
@@ -249,6 +261,10 @@ function runAction(action: PendingAction, claimId: number, note: string): Promis
     return rejectManagerClaim(claimId, { note });
   }
 
+  if (action === 'manager-revision') {
+    return requestClaimRevision(claimId, { note });
+  }
+
   if (action === 'finance-approve') {
     return approveFinanceClaim(claimId, { note });
   }
@@ -259,6 +275,10 @@ function runAction(action: PendingAction, claimId: number, note: string): Promis
 function modalTitle(action: PendingAction | null) {
   if (action === 'manager-reject') {
     return 'Reject Claim';
+  }
+
+  if (action === 'manager-revision') {
+    return 'Request Revision';
   }
 
   if (action === 'finance-approve') {

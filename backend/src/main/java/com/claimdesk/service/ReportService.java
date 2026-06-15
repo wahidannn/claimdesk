@@ -109,6 +109,8 @@ public class ReportService {
         long paidClaims = claims.stream().filter(claim -> claim.getStatus() == ClaimStatus.PAID).count();
         long pendingClaims = claims.stream()
                 .filter(claim -> claim.getStatus() == ClaimStatus.SUBMITTED
+                        || claim.getStatus() == ClaimStatus.REVISION_REQUESTED
+                        || claim.getStatus() == ClaimStatus.REVISED
                         || claim.getStatus() == ClaimStatus.MANAGER_APPROVED
                         || claim.getStatus() == ClaimStatus.FINANCE_APPROVED)
                 .count();

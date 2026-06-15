@@ -15,6 +15,8 @@ import { getApiErrorMessage } from '../lib/api-error';
 const statuses: ClaimStatus[] = [
   'DRAFT',
   'SUBMITTED',
+  'REVISION_REQUESTED',
+  'REVISED',
   'MANAGER_APPROVED',
   'MANAGER_REJECTED',
   'FINANCE_APPROVED',
@@ -175,7 +177,7 @@ export function MyClaimsPage() {
                         Detail
                       </Link>
                     </Button>
-                    {claim.status === 'DRAFT' && (
+                    {(claim.status === 'DRAFT' || claim.status === 'REVISION_REQUESTED' || claim.status === 'REVISED') && (
                       <Button asChild variant="secondary">
                         <Link to={`/claims/${claim.id}/edit`}>
                           <Edit size={15} />
@@ -183,7 +185,7 @@ export function MyClaimsPage() {
                         </Link>
                       </Button>
                     )}
-                    {claim.status === 'DRAFT' && (
+                    {(claim.status === 'DRAFT' || claim.status === 'REVISED') && (
                       <Button
                         type="button"
                         variant="ghost"
@@ -192,7 +194,10 @@ export function MyClaimsPage() {
                         Submit
                       </Button>
                     )}
-                    {(claim.status === 'DRAFT' || claim.status === 'SUBMITTED') && (
+                    {(claim.status === 'DRAFT' ||
+                      claim.status === 'SUBMITTED' ||
+                      claim.status === 'REVISION_REQUESTED' ||
+                      claim.status === 'REVISED') && (
                       <Button
                         type="button"
                         variant="ghost"

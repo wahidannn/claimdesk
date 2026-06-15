@@ -81,6 +81,14 @@ export function ClaimDetailPage() {
   });
 
   const claim = claimQuery.data;
+  const canEditClaim = claim?.status === 'DRAFT' || claim?.status === 'REVISION_REQUESTED' || claim?.status === 'REVISED';
+  const canSubmitClaim = claim?.status === 'DRAFT' || claim?.status === 'REVISED';
+  const canCancelClaim =
+    claim?.status === 'DRAFT' ||
+    claim?.status === 'SUBMITTED' ||
+    claim?.status === 'REVISION_REQUESTED' ||
+    claim?.status === 'REVISED';
+  const canManageReceipts = canEditClaim;
 
   if (claimQuery.isLoading) {
     return <div className="text-sm text-slate-500">Loading claim...</div>;
@@ -116,20 +124,20 @@ export function ClaimDetailPage() {
           <p className="mt-1 text-sm text-slate-500">{claim.category.name}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {claim.status === 'DRAFT' && (
+          {canEditClaim && (
             <Button asChild variant="secondary">
               <Link to={`/claims/${claim.id}/edit`}>
                 <Edit size={16} />
-                Edit
+                {claim.status === 'REVISION_REQUESTED' ? 'Edit Revision' : 'Edit'}
               </Link>
             </Button>
           )}
-          {claim.status === 'DRAFT' && (
+          {canSubmitClaim && (
             <Button type="button" onClick={() => actionMutation.mutate('submit')}>
               Submit
             </Button>
           )}
-          {(claim.status === 'DRAFT' || claim.status === 'SUBMITTED') && (
+          {canCancelClaim && (
             <Button type="button" variant="ghost" onClick={() => actionMutation.mutate('cancel')}>
               Cancel Claim
             </Button>
@@ -141,6 +149,13 @@ export function ClaimDetailPage() {
         <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {getApiErrorMessage(actionMutation.error, 'Action claim gagal.')}
         </div>
+      )}
+
+      {claim.status === 'REVISION_REQUESTED' && claim.latestRevisionNote && (
+        <section className="rounded border border-amber-200 bg-amber-50 p-5">
+          <h2 className="text-sm font-semibold text-amber-900">Revision requested</h2>
+          <p className="mt-2 text-sm text-amber-800">{claim.latestRevisionNote}</p>
+        </section>
       )}
 
       <section className="grid gap-4 rounded border border-border bg-surface p-5 sm:grid-cols-2">
@@ -157,9 +172,9 @@ export function ClaimDetailPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold">Receipts</h2>
-            <p className="mt-1 text-sm text-slate-500">Upload JPG, PNG, atau PDF maksimal 5 MB untuk draft claim.</p>
+            <p className="mt-1 text-sm text-slate-500">Upload JPG, PNG, atau PDF maksimal 5 MB untuk draft atau revision claim.</p>
           </div>
-          {claim.status === 'DRAFT' && (
+          {canManageReceipts && (
             <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded bg-accent px-4 text-sm font-medium text-white transition hover:bg-blue-700">
               <Upload size={16} />
               Upload Receipt
@@ -204,7 +219,7 @@ export function ClaimDetailPage() {
                 >
                   View
                 </Button>
-                {claim.status === 'DRAFT' && (
+                {canManageReceipts && (
                   <Button
                     type="button"
                     variant="ghost"

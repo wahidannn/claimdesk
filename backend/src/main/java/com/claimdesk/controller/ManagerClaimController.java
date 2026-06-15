@@ -72,6 +72,15 @@ public class ManagerClaimController {
         return approvalWorkflowService.managerReject(principal.getName(), id, request.note());
     }
 
+    @PostMapping("/{id}/request-revision")
+    public ReviewClaimResponse requestRevision(
+            Principal principal,
+            @PathVariable Long id,
+            @Valid @RequestBody ApprovalActionRequest request
+    ) {
+        return approvalWorkflowService.requestRevision(principal.getName(), id, request.note());
+    }
+
     private int normalizeSize(int size) {
         return Math.min(Math.max(size, 1), 100);
     }

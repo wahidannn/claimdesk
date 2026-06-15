@@ -6,6 +6,7 @@ import com.claimdesk.dto.ClaimRequest;
 import com.claimdesk.dto.ClaimResponse;
 import com.claimdesk.dto.PagedResponse;
 import com.claimdesk.dto.SimpleUserResponse;
+import com.claimdesk.entity.ApprovalAction;
 import com.claimdesk.entity.AuditAction;
 import com.claimdesk.entity.AuditResourceType;
 import com.claimdesk.entity.ClaimStatus;
@@ -13,10 +14,12 @@ import com.claimdesk.entity.ExpenseCategory;
 import com.claimdesk.entity.ExpenseClaim;
 import com.claimdesk.entity.Role;
 import com.claimdesk.entity.User;
+import com.claimdesk.repository.ApprovalNoteRepository;
 import com.claimdesk.repository.ExpenseCategoryRepository;
 import com.claimdesk.repository.ExpenseClaimRepository;
 import com.claimdesk.repository.UserRepository;
 import java.time.LocalDate;
+import java.util.Set;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -28,8 +31,22 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class ExpenseClaimService {
 
+    private static final Set<ClaimStatus> EDITABLE_STATUSES = Set.of(
+            ClaimStatus.DRAFT,
+            ClaimStatus.REVISION_REQUESTED,
+            ClaimStatus.REVISED
+    );
+
+    private static final Set<ClaimStatus> CANCELLABLE_STATUSES = Set.of(
+            ClaimStatus.DRAFT,
+            ClaimStatus.SUBMITTED,
+            ClaimStatus.REVISION_REQUESTED,
+            ClaimStatus.REVISED
+    );
+
     private final ExpenseClaimRepository claimRepository;
     private final ExpenseCategoryRepository categoryRepository;
+    private final ApprovalNoteRepository approvalNoteRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final AuditLogService auditLogService;
@@ -37,12 +54,14 @@ public class ExpenseClaimService {
     public ExpenseClaimService(
             ExpenseClaimRepository claimRepository,
             ExpenseCategoryRepository categoryRepository,
+            ApprovalNoteRepository approvalNoteRepository,
             UserRepository userRepository,
             NotificationService notificationService,
             AuditLogService auditLogService
     ) {
         this.claimRepository = claimRepository;
         this.categoryRepository = categoryRepository;
+        this.approvalNoteRepository = approvalNoteRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
         this.auditLogService = auditLogService;
@@ -105,16 +124,21 @@ public class ExpenseClaimService {
 
     @Transactional
     @CacheEvict(
-            cacheNames = {CacheConfig.EMPLOYEE_DASHBOARD, CacheConfig.CLAIM_REPORT_SUMMARY},
+            cacheNames = {
+                    CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
             allEntries = true
     )
     public ClaimResponse updateClaim(String email, Long id, ClaimRequest request) {
         User employee = resolveEmployee(email);
         ExpenseClaim claim = findOwnedClaim(id, employee);
-        if (claim.getStatus() != ClaimStatus.DRAFT) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only draft claims can be updated");
+        if (!EDITABLE_STATUSES.contains(claim.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only draft or revision claims can be updated");
         }
 
+        boolean revisionRequested = claim.getStatus() == ClaimStatus.REVISION_REQUESTED;
         ExpenseCategory category = resolveActiveCategory(request.categoryId());
         validateTransactionDate(request.transactionDate());
         claim.updateDraft(
@@ -125,12 +149,18 @@ public class ExpenseClaimService {
                 request.transactionDate()
         );
 
+        if (revisionRequested) {
+            claim.markRevised();
+        }
+
         auditLogService.record(
                 employee.getEmail(),
-                AuditAction.CLAIM_UPDATED,
+                revisionRequested ? AuditAction.CLAIM_REVISED : AuditAction.CLAIM_UPDATED,
                 AuditResourceType.CLAIM,
                 claim.getId(),
-                employee.getName() + " updated claim " + claim.getTitle() + ".",
+                revisionRequested
+                        ? employee.getName() + " revised claim " + claim.getTitle() + "."
+                        : employee.getName() + " updated claim " + claim.getTitle() + ".",
                 "{\"status\":\"" + claim.getStatus() + "\",\"amount\":" + claim.getAmount() + "}"
         );
         return toResponse(claim);
@@ -148,10 +178,11 @@ public class ExpenseClaimService {
     public ClaimResponse submitClaim(String email, Long id) {
         User employee = resolveEmployee(email);
         ExpenseClaim claim = findOwnedClaim(id, employee);
-        if (claim.getStatus() != ClaimStatus.DRAFT) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only draft claims can be submitted");
+        if (claim.getStatus() != ClaimStatus.DRAFT && claim.getStatus() != ClaimStatus.REVISED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only draft or revised claims can be submitted");
         }
 
+        boolean resubmission = claim.getStatus() == ClaimStatus.REVISED;
         claim.submit();
         notificationService.notifyClaimSubmitted(claim);
         auditLogService.record(
@@ -159,8 +190,10 @@ public class ExpenseClaimService {
                 AuditAction.CLAIM_SUBMITTED,
                 AuditResourceType.CLAIM,
                 claim.getId(),
-                employee.getName() + " submitted claim " + claim.getTitle() + ".",
-                "{\"status\":\"" + claim.getStatus() + "\",\"amount\":" + claim.getAmount() + "}"
+                resubmission
+                        ? employee.getName() + " resubmitted revised claim " + claim.getTitle() + "."
+                        : employee.getName() + " submitted claim " + claim.getTitle() + ".",
+                "{\"status\":\"" + claim.getStatus() + "\",\"amount\":" + claim.getAmount() + ",\"resubmission\":" + resubmission + "}"
         );
         return toResponse(claim);
     }
@@ -177,8 +210,8 @@ public class ExpenseClaimService {
     public ClaimResponse cancelClaim(String email, Long id) {
         User employee = resolveEmployee(email);
         ExpenseClaim claim = findOwnedClaim(id, employee);
-        if (claim.getStatus() != ClaimStatus.DRAFT && claim.getStatus() != ClaimStatus.SUBMITTED) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only draft or submitted claims can be cancelled");
+        if (!CANCELLABLE_STATUSES.contains(claim.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only draft, submitted, or revision claims can be cancelled");
         }
 
         claim.cancel();
@@ -249,8 +282,16 @@ public class ExpenseClaimService {
                         claim.getEmployee().getName(),
                         claim.getEmployee().getEmail()
                 ),
+                latestRevisionNote(claim),
                 claim.getCreatedAt(),
                 claim.getUpdatedAt()
         );
+    }
+
+    private String latestRevisionNote(ExpenseClaim claim) {
+        return approvalNoteRepository
+                .findTopByClaimIdAndActionOrderByCreatedAtDesc(claim.getId(), ApprovalAction.REVISION_REQUESTED)
+                .map(note -> note.getNote())
+                .orElse(null);
     }
 }

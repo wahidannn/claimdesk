@@ -15,6 +15,7 @@ public record ClaimResponse(
         OffsetDateTime submittedAt,
         ClaimCategoryResponse category,
         SimpleUserResponse employee,
+        String latestRevisionNote,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
 ) {

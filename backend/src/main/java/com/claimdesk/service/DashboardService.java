@@ -147,7 +147,13 @@ public class DashboardService {
                 claimRepository.count(),
                 claimRepository.sumAllAmounts(),
                 claimRepository.sumAmountByStatus(ClaimStatus.PAID),
-                claimRepository.countByStatusNotIn(List.of(ClaimStatus.PAID, ClaimStatus.MANAGER_REJECTED, ClaimStatus.CANCELLED))
+                claimRepository.countByStatusIn(List.of(
+                        ClaimStatus.SUBMITTED,
+                        ClaimStatus.REVISION_REQUESTED,
+                        ClaimStatus.REVISED,
+                        ClaimStatus.MANAGER_APPROVED,
+                        ClaimStatus.FINANCE_APPROVED
+                ))
         );
 
         return new AdminDashboardResponse(
@@ -314,7 +320,8 @@ public class DashboardService {
                     ));
                 });
 
-        return List.of(ClaimStatus.DRAFT, ClaimStatus.SUBMITTED, ClaimStatus.MANAGER_APPROVED,
+        return List.of(ClaimStatus.DRAFT, ClaimStatus.SUBMITTED, ClaimStatus.REVISION_REQUESTED,
+                        ClaimStatus.REVISED, ClaimStatus.MANAGER_APPROVED,
                         ClaimStatus.MANAGER_REJECTED, ClaimStatus.FINANCE_APPROVED, ClaimStatus.PAID,
                         ClaimStatus.CANCELLED)
                 .stream()
@@ -395,7 +402,8 @@ public class DashboardService {
                     breakdown.put(status, new DashboardBreakdownResponse(status.name(), (Long) row[1], (BigDecimal) row[2]));
                 });
 
-        return List.of(ClaimStatus.DRAFT, ClaimStatus.SUBMITTED, ClaimStatus.MANAGER_APPROVED,
+        return List.of(ClaimStatus.DRAFT, ClaimStatus.SUBMITTED, ClaimStatus.REVISION_REQUESTED,
+                        ClaimStatus.REVISED, ClaimStatus.MANAGER_APPROVED,
                         ClaimStatus.MANAGER_REJECTED, ClaimStatus.FINANCE_APPROVED, ClaimStatus.PAID,
                         ClaimStatus.CANCELLED)
                 .stream()
@@ -472,7 +480,8 @@ public class DashboardService {
                     breakdown.put(status, new DashboardBreakdownResponse(status.name(), (Long) row[1], (BigDecimal) row[2]));
                 });
 
-        return List.of(ClaimStatus.SUBMITTED, ClaimStatus.MANAGER_APPROVED, ClaimStatus.MANAGER_REJECTED,
+        return List.of(ClaimStatus.SUBMITTED, ClaimStatus.REVISION_REQUESTED, ClaimStatus.REVISED,
+                        ClaimStatus.MANAGER_APPROVED, ClaimStatus.MANAGER_REJECTED,
                         ClaimStatus.FINANCE_APPROVED, ClaimStatus.PAID, ClaimStatus.CANCELLED, ClaimStatus.DRAFT)
                 .stream()
                 .map(status -> breakdown.getOrDefault(status, new DashboardBreakdownResponse(status.name(), 0L, BigDecimal.ZERO)))

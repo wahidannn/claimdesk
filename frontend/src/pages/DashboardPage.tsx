@@ -872,6 +872,8 @@ function statusColor(status: ClaimStatus) {
   const colors: Record<ClaimStatus, string> = {
     DRAFT: '#64748b',
     SUBMITTED: '#2563eb',
+    REVISION_REQUESTED: '#9333ea',
+    REVISED: '#0891b2',
     MANAGER_APPROVED: '#0f766e',
     MANAGER_REJECTED: '#dc2626',
     FINANCE_APPROVED: '#d97706',
@@ -897,6 +899,8 @@ function statusBadgeClass(status: ClaimStatus) {
   const classes: Record<ClaimStatus, string> = {
     DRAFT: 'border-slate-200 bg-slate-50 text-slate-700',
     SUBMITTED: 'border-blue-200 bg-blue-50 text-blue-700',
+    REVISION_REQUESTED: 'border-purple-200 bg-purple-50 text-purple-700',
+    REVISED: 'border-cyan-200 bg-cyan-50 text-cyan-700',
     MANAGER_APPROVED: 'border-teal-200 bg-teal-50 text-teal-700',
     MANAGER_REJECTED: 'border-red-200 bg-red-50 text-red-700',
     FINANCE_APPROVED: 'border-amber-200 bg-amber-50 text-amber-700',

@@ -2,7 +2,7 @@ import type { PagedResponse } from '../../lib/api-types';
 import type { ClaimCategory, ClaimEmployee, ClaimStatus, ExpenseAttachment } from '../claims/types';
 import type { Role } from '../auth/types';
 
-export type ApprovalAction = 'MANAGER_APPROVED' | 'MANAGER_REJECTED' | 'FINANCE_APPROVED' | 'PAID';
+export type ApprovalAction = 'REVISION_REQUESTED' | 'MANAGER_APPROVED' | 'MANAGER_REJECTED' | 'FINANCE_APPROVED' | 'PAID';
 
 export type ApprovalReviewer = {
   id: number;

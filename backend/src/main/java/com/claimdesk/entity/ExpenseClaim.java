@@ -156,6 +156,7 @@ public class ExpenseClaim {
         this.status = ClaimStatus.SUBMITTED;
         this.submittedAt = OffsetDateTime.now();
         this.updatedAt = this.submittedAt;
+        this.managerReviewedAt = null;
     }
 
     public void cancel() {
@@ -173,6 +174,17 @@ public class ExpenseClaim {
         this.status = ClaimStatus.MANAGER_REJECTED;
         this.managerReviewedAt = OffsetDateTime.now();
         this.updatedAt = this.managerReviewedAt;
+    }
+
+    public void requestRevision() {
+        this.status = ClaimStatus.REVISION_REQUESTED;
+        this.managerReviewedAt = OffsetDateTime.now();
+        this.updatedAt = this.managerReviewedAt;
+    }
+
+    public void markRevised() {
+        this.status = ClaimStatus.REVISED;
+        this.updatedAt = OffsetDateTime.now();
     }
 
     public void financeApprove() {
