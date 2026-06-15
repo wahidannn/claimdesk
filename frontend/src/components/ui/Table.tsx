@@ -3,7 +3,7 @@ import { cn } from '../../lib/utils';
 
 export function Table({ className, ...props }: TableHTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="app-scrollbar w-full overflow-x-auto">
       <table
         className={cn(
           'w-full border-collapse text-left text-sm leading-5 [&_tbody_tr]:transition-colors [&_tbody_tr:hover]:bg-accentSoft/45 [&_tbody_tr:last-child_td]:border-b-0',
