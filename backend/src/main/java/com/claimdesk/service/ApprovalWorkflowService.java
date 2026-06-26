@@ -98,6 +98,7 @@ public class ApprovalWorkflowService {
                     CacheConfig.MANAGER_DASHBOARD,
                     CacheConfig.EMPLOYEE_DASHBOARD,
                     CacheConfig.FINANCE_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
                     CacheConfig.CLAIM_REPORT_SUMMARY
             },
             allEntries = true
@@ -129,6 +130,7 @@ public class ApprovalWorkflowService {
             cacheNames = {
                     CacheConfig.MANAGER_DASHBOARD,
                     CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
                     CacheConfig.CLAIM_REPORT_SUMMARY
             },
             allEntries = true
@@ -165,6 +167,7 @@ public class ApprovalWorkflowService {
             cacheNames = {
                     CacheConfig.MANAGER_DASHBOARD,
                     CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
                     CacheConfig.CLAIM_REPORT_SUMMARY
             },
             allEntries = true
@@ -231,6 +234,7 @@ public class ApprovalWorkflowService {
             cacheNames = {
                     CacheConfig.FINANCE_DASHBOARD,
                     CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
                     CacheConfig.CLAIM_REPORT_SUMMARY
             },
             allEntries = true
@@ -261,6 +265,7 @@ public class ApprovalWorkflowService {
             cacheNames = {
                     CacheConfig.FINANCE_DASHBOARD,
                     CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
                     CacheConfig.CLAIM_REPORT_SUMMARY
             },
             allEntries = true

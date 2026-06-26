@@ -7,7 +7,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { Select } from '../components/ui/Select';
-import { Table, Td, Th } from '../components/ui/Table';
+import { Table, TableLoadingRow, Td, Th } from '../components/ui/Table';
 import { Textarea } from '../components/ui/Textarea';
 import { approveManagerClaim, listManagerClaims, rejectManagerClaim, requestClaimRevision } from '../features/approvals/api';
 import { listActiveCategories } from '../features/claims/api';
@@ -176,6 +176,7 @@ export function ApprovalQueuePage() {
             </tr>
           </thead>
           <tbody>
+            {claimsQuery.isLoading && <TableLoadingRow colSpan={6} label="Loading approvals..." />}
             {claims.map((claim) => (
               <tr key={claim.id}>
                 <Td>

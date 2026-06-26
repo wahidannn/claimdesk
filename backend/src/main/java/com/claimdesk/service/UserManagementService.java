@@ -59,6 +59,7 @@ public class UserManagementService {
                     CacheConfig.ADMIN_DASHBOARD,
                     CacheConfig.MANAGER_DASHBOARD,
                     CacheConfig.FINANCE_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
                     CacheConfig.CLAIM_REPORT_SUMMARY
             },
             allEntries = true
@@ -96,6 +97,7 @@ public class UserManagementService {
                     CacheConfig.ADMIN_DASHBOARD,
                     CacheConfig.MANAGER_DASHBOARD,
                     CacheConfig.FINANCE_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
                     CacheConfig.CLAIM_REPORT_SUMMARY
             },
             allEntries = true
@@ -136,6 +138,7 @@ public class UserManagementService {
                     CacheConfig.ADMIN_DASHBOARD,
                     CacheConfig.MANAGER_DASHBOARD,
                     CacheConfig.FINANCE_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
                     CacheConfig.CLAIM_REPORT_SUMMARY
             },
             allEntries = true

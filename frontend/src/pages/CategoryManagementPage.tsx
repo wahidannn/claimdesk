@@ -6,7 +6,7 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
-import { Table, Td, Th } from '../components/ui/Table';
+import { Table, TableLoadingRow, Td, Th } from '../components/ui/Table';
 import { Textarea } from '../components/ui/Textarea';
 import { createCategory, listCategories, updateCategory, updateCategoryStatus } from '../features/categories/api';
 import type { ExpenseCategory } from '../features/categories/types';
@@ -154,6 +154,7 @@ export function CategoryManagementPage() {
             </tr>
           </thead>
           <tbody>
+            {categoriesQuery.isLoading && <TableLoadingRow colSpan={4} label="Loading categories..." />}
             {categories.map((category) => (
               <tr key={category.id}>
                 <Td className="font-medium">{category.name}</Td>

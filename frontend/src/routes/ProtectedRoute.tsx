@@ -1,4 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom';
+import { LoadingState } from '../components/ui/Spinner';
 import { useAuth } from '../features/auth/useAuth';
 
 export function ProtectedRoute({ children }: { children: JSX.Element }) {
@@ -7,8 +8,8 @@ export function ProtectedRoute({ children }: { children: JSX.Element }) {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-muted text-sm text-slate-600">
-        Loading session...
+      <div className="flex min-h-screen items-center justify-center bg-muted">
+        <LoadingState label="Loading session..." />
       </div>
     );
   }

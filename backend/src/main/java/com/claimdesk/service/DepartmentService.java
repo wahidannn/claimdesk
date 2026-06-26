@@ -53,6 +53,7 @@ public class DepartmentService {
             cacheNames = {
                     CacheConfig.ADMIN_DASHBOARD,
                     CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
                     CacheConfig.CLAIM_REPORT_SUMMARY
             },
             allEntries = true
@@ -85,6 +86,7 @@ public class DepartmentService {
             cacheNames = {
                     CacheConfig.ADMIN_DASHBOARD,
                     CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
                     CacheConfig.CLAIM_REPORT_SUMMARY
             },
             allEntries = true
@@ -112,6 +114,7 @@ public class DepartmentService {
             cacheNames = {
                     CacheConfig.ADMIN_DASHBOARD,
                     CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
                     CacheConfig.CLAIM_REPORT_SUMMARY
             },
             allEntries = true

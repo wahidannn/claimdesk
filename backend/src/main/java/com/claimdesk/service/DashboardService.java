@@ -75,6 +75,7 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheConfig.DASHBOARD_SUMMARY, key = "#email")
     public DashboardSummaryResponse getSummary(String email) {
         User user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));

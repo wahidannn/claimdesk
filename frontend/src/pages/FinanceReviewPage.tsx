@@ -7,7 +7,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { Select } from '../components/ui/Select';
-import { Table, Td, Th } from '../components/ui/Table';
+import { Table, TableLoadingRow, Td, Th } from '../components/ui/Table';
 import { Textarea } from '../components/ui/Textarea';
 import { listActiveCategories } from '../features/claims/api';
 import { formatCurrency } from '../features/claims/currency';
@@ -163,6 +163,7 @@ export function FinanceReviewPage() {
             </tr>
           </thead>
           <tbody>
+            {claimsQuery.isLoading && <TableLoadingRow colSpan={6} label="Loading finance review..." />}
             {claims.map((claim) => (
               <tr key={claim.id}>
                 <Td>

@@ -6,7 +6,7 @@ import { ActionMenu } from '../components/ui/ActionMenu';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
-import { Table, Td, Th } from '../components/ui/Table';
+import { Table, TableLoadingRow, Td, Th } from '../components/ui/Table';
 import { cancelClaim, listActiveCategories, listClaims, submitClaim } from '../features/claims/api';
 import { formatCurrency } from '../features/claims/currency';
 import { StatusBadge } from '../features/claims/format';
@@ -159,6 +159,7 @@ export function MyClaimsPage() {
             </tr>
           </thead>
           <tbody>
+            {claimsQuery.isLoading && <TableLoadingRow colSpan={6} label="Loading claims..." />}
             {claims.map((claim) => (
               <tr key={claim.id}>
                 <Td>

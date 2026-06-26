@@ -7,7 +7,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { Select } from '../components/ui/Select';
-import { Table, Td, Th } from '../components/ui/Table';
+import { Table, TableLoadingRow, Td, Th } from '../components/ui/Table';
 import { listAuditLogs } from '../features/audit-logs/api';
 import type { AuditAction, AuditLog, AuditResourceType } from '../features/audit-logs/types';
 import type { Role } from '../features/auth/types';
@@ -177,6 +177,7 @@ export function AuditLogsPage() {
             </tr>
           </thead>
           <tbody>
+            {auditLogsQuery.isLoading && <TableLoadingRow colSpan={6} label="Loading audit logs..." />}
             {auditLogs.map((auditLog) => (
               <tr key={auditLog.id}>
                 <Td className="whitespace-nowrap text-slate-600">{formatDateTime(auditLog.createdAt)}</Td>

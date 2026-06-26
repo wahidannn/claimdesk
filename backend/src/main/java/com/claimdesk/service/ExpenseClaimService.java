@@ -93,7 +93,11 @@ public class ExpenseClaimService {
 
     @Transactional
     @CacheEvict(
-            cacheNames = {CacheConfig.EMPLOYEE_DASHBOARD, CacheConfig.CLAIM_REPORT_SUMMARY},
+            cacheNames = {
+                    CacheConfig.EMPLOYEE_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
+                    CacheConfig.CLAIM_REPORT_SUMMARY
+            },
             allEntries = true
     )
     public ClaimResponse createClaim(String email, ClaimRequest request) {
@@ -127,6 +131,7 @@ public class ExpenseClaimService {
             cacheNames = {
                     CacheConfig.EMPLOYEE_DASHBOARD,
                     CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
                     CacheConfig.CLAIM_REPORT_SUMMARY
             },
             allEntries = true
@@ -171,6 +176,7 @@ public class ExpenseClaimService {
             cacheNames = {
                     CacheConfig.EMPLOYEE_DASHBOARD,
                     CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
                     CacheConfig.CLAIM_REPORT_SUMMARY
             },
             allEntries = true
@@ -203,6 +209,7 @@ public class ExpenseClaimService {
             cacheNames = {
                     CacheConfig.EMPLOYEE_DASHBOARD,
                     CacheConfig.MANAGER_DASHBOARD,
+                    CacheConfig.DASHBOARD_SUMMARY,
                     CacheConfig.CLAIM_REPORT_SUMMARY
             },
             allEntries = true

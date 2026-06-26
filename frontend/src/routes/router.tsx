@@ -1,36 +1,45 @@
+import { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppLayout } from '../layouts/AppLayout';
-import { ApprovalQueuePage } from '../pages/ApprovalQueuePage';
-import { AuditLogsPage } from '../pages/AuditLogsPage';
-import { CategoryManagementPage } from '../pages/CategoryManagementPage';
-import { ClaimDetailPage } from '../pages/ClaimDetailPage';
-import { ClaimFormPage } from '../pages/ClaimFormPage';
-import { DashboardPage } from '../pages/DashboardPage';
-import { DepartmentManagementPage } from '../pages/DepartmentManagementPage';
-import { FinanceReviewPage } from '../pages/FinanceReviewPage';
-import { HealthPage } from '../pages/HealthPage';
-import { LoginPage } from '../pages/LoginPage';
-import { NotFoundPage } from '../pages/NotFoundPage';
-import { ReportsPage } from '../pages/ReportsPage';
-import { ReviewDetailPage } from '../pages/ReviewDetailPage';
-import { UserManagementPage } from '../pages/UserManagementPage';
-import { MyClaimsPage } from '../pages/MyClaimsPage';
 import { GuestRoute } from './GuestRoute';
+import { LazyPage } from './LazyPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleRoute } from './RoleRoute';
+
+const ApprovalQueuePage = lazy(() => import('../pages/ApprovalQueuePage').then((module) => ({ default: module.ApprovalQueuePage })));
+const AuditLogsPage = lazy(() => import('../pages/AuditLogsPage').then((module) => ({ default: module.AuditLogsPage })));
+const CategoryManagementPage = lazy(() => import('../pages/CategoryManagementPage').then((module) => ({ default: module.CategoryManagementPage })));
+const ClaimDetailPage = lazy(() => import('../pages/ClaimDetailPage').then((module) => ({ default: module.ClaimDetailPage })));
+const ClaimFormPage = lazy(() => import('../pages/ClaimFormPage').then((module) => ({ default: module.ClaimFormPage })));
+const DashboardPage = lazy(() => import('../pages/DashboardPage').then((module) => ({ default: module.DashboardPage })));
+const DepartmentManagementPage = lazy(() => import('../pages/DepartmentManagementPage').then((module) => ({ default: module.DepartmentManagementPage })));
+const FinanceReviewPage = lazy(() => import('../pages/FinanceReviewPage').then((module) => ({ default: module.FinanceReviewPage })));
+const HealthPage = lazy(() => import('../pages/HealthPage').then((module) => ({ default: module.HealthPage })));
+const LoginPage = lazy(() => import('../pages/LoginPage').then((module) => ({ default: module.LoginPage })));
+const MyClaimsPage = lazy(() => import('../pages/MyClaimsPage').then((module) => ({ default: module.MyClaimsPage })));
+const NotFoundPage = lazy(() => import('../pages/NotFoundPage').then((module) => ({ default: module.NotFoundPage })));
+const ReportsPage = lazy(() => import('../pages/ReportsPage').then((module) => ({ default: module.ReportsPage })));
+const ReviewDetailPage = lazy(() => import('../pages/ReviewDetailPage').then((module) => ({ default: module.ReviewDetailPage })));
+const UserManagementPage = lazy(() => import('../pages/UserManagementPage').then((module) => ({ default: module.UserManagementPage })));
 
 export const router = createBrowserRouter([
   {
     path: '/login',
     element: (
       <GuestRoute>
-        <LoginPage />
+        <LazyPage>
+          <LoginPage />
+        </LazyPage>
       </GuestRoute>
     ),
   },
   {
     path: '/health',
-    element: <HealthPage />,
+    element: (
+      <LazyPage>
+        <HealthPage />
+      </LazyPage>
+    ),
   },
   {
     path: '/',
@@ -41,12 +50,21 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
-      { path: 'dashboard', element: <DashboardPage /> },
+      {
+        path: 'dashboard',
+        element: (
+          <LazyPage>
+            <DashboardPage />
+          </LazyPage>
+        ),
+      },
       {
         path: 'reports',
         element: (
           <RoleRoute roles={['ADMIN', 'EMPLOYEE', 'MANAGER', 'FINANCE']}>
-            <ReportsPage />
+            <LazyPage>
+              <ReportsPage />
+            </LazyPage>
           </RoleRoute>
         ),
       },
@@ -54,7 +72,9 @@ export const router = createBrowserRouter([
         path: 'users',
         element: (
           <RoleRoute roles={['ADMIN']}>
-            <UserManagementPage />
+            <LazyPage>
+              <UserManagementPage />
+            </LazyPage>
           </RoleRoute>
         ),
       },
@@ -62,7 +82,9 @@ export const router = createBrowserRouter([
         path: 'departments',
         element: (
           <RoleRoute roles={['ADMIN']}>
-            <DepartmentManagementPage />
+            <LazyPage>
+              <DepartmentManagementPage />
+            </LazyPage>
           </RoleRoute>
         ),
       },
@@ -70,7 +92,9 @@ export const router = createBrowserRouter([
         path: 'audit-logs',
         element: (
           <RoleRoute roles={['ADMIN']}>
-            <AuditLogsPage />
+            <LazyPage>
+              <AuditLogsPage />
+            </LazyPage>
           </RoleRoute>
         ),
       },
@@ -78,7 +102,9 @@ export const router = createBrowserRouter([
         path: 'categories',
         element: (
           <RoleRoute roles={['FINANCE']}>
-            <CategoryManagementPage />
+            <LazyPage>
+              <CategoryManagementPage />
+            </LazyPage>
           </RoleRoute>
         ),
       },
@@ -86,7 +112,9 @@ export const router = createBrowserRouter([
         path: 'claims',
         element: (
           <RoleRoute roles={['EMPLOYEE']}>
-            <MyClaimsPage />
+            <LazyPage>
+              <MyClaimsPage />
+            </LazyPage>
           </RoleRoute>
         ),
       },
@@ -94,7 +122,9 @@ export const router = createBrowserRouter([
         path: 'claims/new',
         element: (
           <RoleRoute roles={['EMPLOYEE']}>
-            <ClaimFormPage />
+            <LazyPage>
+              <ClaimFormPage />
+            </LazyPage>
           </RoleRoute>
         ),
       },
@@ -102,7 +132,9 @@ export const router = createBrowserRouter([
         path: 'claims/:id',
         element: (
           <RoleRoute roles={['EMPLOYEE']}>
-            <ClaimDetailPage />
+            <LazyPage>
+              <ClaimDetailPage />
+            </LazyPage>
           </RoleRoute>
         ),
       },
@@ -110,7 +142,9 @@ export const router = createBrowserRouter([
         path: 'claims/:id/edit',
         element: (
           <RoleRoute roles={['EMPLOYEE']}>
-            <ClaimFormPage />
+            <LazyPage>
+              <ClaimFormPage />
+            </LazyPage>
           </RoleRoute>
         ),
       },
@@ -118,7 +152,9 @@ export const router = createBrowserRouter([
         path: 'approvals',
         element: (
           <RoleRoute roles={['MANAGER']}>
-            <ApprovalQueuePage />
+            <LazyPage>
+              <ApprovalQueuePage />
+            </LazyPage>
           </RoleRoute>
         ),
       },
@@ -126,7 +162,9 @@ export const router = createBrowserRouter([
         path: 'approvals/:id',
         element: (
           <RoleRoute roles={['MANAGER']}>
-            <ReviewDetailPage mode="manager" />
+            <LazyPage>
+              <ReviewDetailPage mode="manager" />
+            </LazyPage>
           </RoleRoute>
         ),
       },
@@ -134,7 +172,9 @@ export const router = createBrowserRouter([
         path: 'finance-review',
         element: (
           <RoleRoute roles={['FINANCE']}>
-            <FinanceReviewPage />
+            <LazyPage>
+              <FinanceReviewPage />
+            </LazyPage>
           </RoleRoute>
         ),
       },
@@ -142,11 +182,20 @@ export const router = createBrowserRouter([
         path: 'finance-review/:id',
         element: (
           <RoleRoute roles={['FINANCE']}>
-            <ReviewDetailPage mode="finance" />
+            <LazyPage>
+              <ReviewDetailPage mode="finance" />
+            </LazyPage>
           </RoleRoute>
         ),
       },
-      { path: '*', element: <NotFoundPage /> },
+      {
+        path: '*',
+        element: (
+          <LazyPage>
+            <NotFoundPage />
+          </LazyPage>
+        ),
+      },
     ],
   },
 ]);

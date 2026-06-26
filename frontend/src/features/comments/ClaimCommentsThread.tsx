@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FormEvent, useState } from 'react';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
+import { LoadingState, Spinner } from '../../components/ui/Spinner';
 import { Textarea } from '../../components/ui/Textarea';
 import { getApiErrorMessage } from '../../lib/api-error';
 import { formatDateTime } from '../../lib/date-format';
@@ -46,7 +47,9 @@ export function ClaimCommentsThread({ claimId }: { claimId: number }) {
       </div>
 
       <div className="space-y-3">
-        {commentsQuery.isLoading && <div className="text-sm text-slate-500">Loading comments...</div>}
+        {commentsQuery.isLoading && (
+          <LoadingState className="rounded border border-dashed border-border px-4 py-6" label="Loading comments..." />
+        )}
 
         {!commentsQuery.isLoading && comments.length === 0 && (
           <div className="rounded border border-dashed border-border px-4 py-6 text-center text-sm text-slate-500">
@@ -92,6 +95,7 @@ export function ClaimCommentsThread({ claimId }: { claimId: number }) {
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs text-slate-500">{message.length}/2000</span>
           <Button type="submit" disabled={!message.trim() || createMutation.isPending}>
+            {createMutation.isPending && <Spinner size="sm" className="text-white" />}
             Post Comment
           </Button>
         </div>

@@ -7,7 +7,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { Select } from '../components/ui/Select';
-import { Table, Td, Th } from '../components/ui/Table';
+import { Table, TableLoadingRow, Td, Th } from '../components/ui/Table';
 import { listDepartments } from '../features/departments/api';
 import type { Role } from '../features/auth/types';
 import { createUser, listUsers, updateUser, updateUserStatus } from '../features/users/api';
@@ -190,6 +190,7 @@ export function UserManagementPage() {
             </tr>
           </thead>
           <tbody>
+            {usersQuery.isLoading && <TableLoadingRow colSpan={5} label="Loading users..." />}
             {users.map((user) => (
               <tr key={user.id}>
                 <Td>

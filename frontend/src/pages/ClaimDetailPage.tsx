@@ -3,6 +3,7 @@ import { ArrowLeft, Edit, FileText, Trash2, Upload } from 'lucide-react';
 import { ChangeEvent, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
+import { LoadingState, Spinner } from '../components/ui/Spinner';
 import { ClaimCommentsThread } from '../features/comments/ClaimCommentsThread';
 import {
   cancelClaim,
@@ -93,7 +94,7 @@ export function ClaimDetailPage() {
   const canManageReceipts = canEditClaim;
 
   if (claimQuery.isLoading) {
-    return <div className="text-sm text-slate-500">Loading claim...</div>;
+    return <LoadingState className="min-h-[240px]" label="Loading claim..." />;
   }
 
   if (!claim) {
@@ -135,12 +136,14 @@ export function ClaimDetailPage() {
             </Button>
           )}
           {canSubmitClaim && (
-            <Button type="button" onClick={() => actionMutation.mutate('submit')}>
+            <Button type="button" onClick={() => actionMutation.mutate('submit')} disabled={actionMutation.isPending}>
+              {actionMutation.isPending && <Spinner size="sm" className="text-white" />}
               Submit
             </Button>
           )}
           {canCancelClaim && (
-            <Button type="button" variant="danger" onClick={() => actionMutation.mutate('cancel')}>
+            <Button type="button" variant="danger" onClick={() => actionMutation.mutate('cancel')} disabled={actionMutation.isPending}>
+              {actionMutation.isPending && <Spinner size="sm" className="text-red-700" />}
               Cancel Claim
             </Button>
           )}
@@ -198,6 +201,7 @@ export function ClaimDetailPage() {
         )}
 
         <div className="space-y-2">
+          {attachmentsQuery.isLoading && <LoadingState className="rounded border border-dashed border-border px-4 py-6" label="Loading receipts..." />}
           {(attachmentsQuery.data ?? []).map((attachment) => (
             <div
               key={attachment.id}
@@ -219,6 +223,7 @@ export function ClaimDetailPage() {
                   onClick={() => downloadMutation.mutate(attachment)}
                   disabled={downloadMutation.isPending}
                 >
+                  {downloadMutation.isPending && <Spinner size="sm" />}
                   View
                 </Button>
                 {canManageReceipts && (
@@ -228,6 +233,7 @@ export function ClaimDetailPage() {
                     onClick={() => deleteMutation.mutate(attachment.id)}
                     disabled={deleteMutation.isPending}
                   >
+                    {deleteMutation.isPending && <Spinner size="sm" className="text-red-700" />}
                     <Trash2 size={15} />
                     Delete
                   </Button>

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { LoadingState, Spinner } from '../components/ui/Spinner';
 import { apiClient } from '../lib/api-client';
 
 type HealthResponse = {
@@ -28,13 +29,13 @@ export function HealthPage() {
           <p className="mt-2 text-sm text-slate-600">Menguji koneksi frontend ke backend.</p>
         </div>
         <Button type="button" variant="secondary" onClick={() => healthQuery.refetch()}>
-          <RefreshCw size={16} />
+          {healthQuery.isFetching ? <Spinner size="sm" /> : <RefreshCw size={16} />}
           Refresh
         </Button>
       </div>
 
       <div className="mt-6 rounded border border-border bg-muted p-4">
-        {healthQuery.isLoading && <p className="text-sm text-slate-600">Loading health status...</p>}
+        {healthQuery.isLoading && <LoadingState className="py-4" label="Loading health status..." />}
         {healthQuery.isError && (
           <p className="text-sm text-red-600">Backend belum bisa dihubungi. Pastikan API berjalan.</p>
         )}

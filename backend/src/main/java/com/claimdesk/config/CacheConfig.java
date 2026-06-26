@@ -23,6 +23,7 @@ public class CacheConfig {
     public static final String ADMIN_DASHBOARD = "adminDashboard";
     public static final String MANAGER_DASHBOARD = "managerDashboard";
     public static final String FINANCE_DASHBOARD = "financeDashboard";
+    public static final String DASHBOARD_SUMMARY = "dashboardSummary";
     public static final String ACTIVE_CATEGORIES = "activeCategories";
     public static final String NOTIFICATION_UNREAD_COUNT = "notificationUnreadCount";
     public static final String CLAIM_REPORT_SUMMARY = "claimReportSummary";
@@ -49,6 +50,7 @@ public class CacheConfig {
                 .withCacheConfiguration(ADMIN_DASHBOARD, dashboardConfig)
                 .withCacheConfiguration(MANAGER_DASHBOARD, dashboardConfig)
                 .withCacheConfiguration(FINANCE_DASHBOARD, dashboardConfig)
+                .withCacheConfiguration(DASHBOARD_SUMMARY, dashboardConfig)
                 .withCacheConfiguration(CLAIM_REPORT_SUMMARY, dashboardConfig)
                 .withCacheConfiguration(ACTIVE_CATEGORIES, referenceConfig)
                 .withCacheConfiguration(NOTIFICATION_UNREAD_COUNT, notificationConfig);

@@ -7,7 +7,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { Select } from '../components/ui/Select';
-import { Table, Td, Th } from '../components/ui/Table';
+import { Table, TableLoadingRow, Td, Th } from '../components/ui/Table';
 import { createDepartment, listDepartments, updateDepartment, updateDepartmentStatus } from '../features/departments/api';
 import type { Department } from '../features/departments/types';
 import { listUsers } from '../features/users/api';
@@ -161,6 +161,7 @@ export function DepartmentManagementPage() {
             </tr>
           </thead>
           <tbody>
+            {departmentsQuery.isLoading && <TableLoadingRow colSpan={4} label="Loading departments..." />}
             {departments.map((department) => (
               <tr key={department.id}>
                 <Td className="font-medium">{department.name}</Td>

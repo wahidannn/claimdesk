@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   Bell,
@@ -14,6 +15,7 @@ import {
   Users,
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { LoadingState } from '../components/ui/Spinner';
 import type { Role } from '../features/auth/types';
 import { useAuth } from '../features/auth/useAuth';
 import { getDashboardSummary } from '../features/dashboard/api';
@@ -55,6 +57,8 @@ export function AppLayout() {
   const { user, logoutUser } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement>(null);
   const visibleNavItems = navItems.filter((item) => user && item.roles.includes(user.role));
   const dashboardQuery = useQuery({
     queryKey: ['dashboard-summary'],
@@ -69,7 +73,7 @@ export function AppLayout() {
   const notificationsQuery = useQuery({
     queryKey: ['notifications'],
     queryFn: listNotifications,
-    refetchInterval: 30000,
+    enabled: notificationsOpen,
   });
   const readMutation = useMutation({
     mutationFn: markNotificationRead,
@@ -95,8 +99,35 @@ export function AppLayout() {
     if (!notification.read) {
       await readMutation.mutateAsync(notification.id);
     }
+    setNotificationsOpen(false);
     navigate(notification.link);
   }
+
+  useEffect(() => {
+    if (!notificationsOpen) {
+      return;
+    }
+
+    function closeOnOutsideClick(event: MouseEvent) {
+      if (!notificationsRef.current?.contains(event.target as Node)) {
+        setNotificationsOpen(false);
+      }
+    }
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setNotificationsOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [notificationsOpen]);
 
   const unreadCount = unreadQuery.data?.count ?? 0;
   const summary = dashboardQuery.data;
@@ -149,8 +180,15 @@ export function AppLayout() {
               <h2 className="text-lg font-bold text-ink">{user.name}</h2>
             </div>
             <div className="flex items-center gap-3">
-              <div className="group relative">
-                <Button type="button" variant="secondary" className="relative px-3" aria-label="Notifications">
+              <div ref={notificationsRef} className="relative">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="relative px-3"
+                  aria-label="Notifications"
+                  aria-expanded={notificationsOpen}
+                  onClick={() => setNotificationsOpen((value) => !value)}
+                >
                   <Bell size={16} />
                   {unreadCount > 0 && (
                     <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-semibold text-white">
@@ -158,7 +196,12 @@ export function AppLayout() {
                     </span>
                   )}
                 </Button>
-                <div className="invisible absolute right-0 top-11 z-20 w-80 rounded-lg border border-border bg-surface shadow-dropdown opacity-0 transition group-hover:visible group-hover:opacity-100">
+                <div
+                  className={cn(
+                    'absolute right-0 top-11 z-20 w-80 rounded-lg border border-border bg-surface shadow-dropdown transition',
+                    notificationsOpen ? 'visible opacity-100' : 'invisible opacity-0',
+                  )}
+                >
                   <div className="flex items-center justify-between border-b border-border px-4 py-3">
                     <h3 className="text-sm font-semibold">Notifications</h3>
                     <Button
@@ -172,6 +215,9 @@ export function AppLayout() {
                     </Button>
                   </div>
                   <div className="max-h-96 overflow-y-auto">
+                    {notificationsQuery.isLoading && (
+                      <LoadingState className="px-4 py-6" label="Loading notifications..." />
+                    )}
                     {(notificationsQuery.data?.items ?? []).map((notification) => (
                       <button
                         key={notification.id}
@@ -190,7 +236,7 @@ export function AppLayout() {
                         <p className="mt-2 text-xs text-mutedText/70">{formatDateTime(notification.createdAt)}</p>
                       </button>
                     ))}
-                    {!notificationsQuery.isLoading && (notificationsQuery.data?.items ?? []).length === 0 && (
+                    {!notificationsQuery.isLoading && notificationsOpen && (notificationsQuery.data?.items ?? []).length === 0 && (
                       <div className="px-4 py-6 text-center text-sm text-mutedText">No notifications.</div>
                     )}
                   </div>

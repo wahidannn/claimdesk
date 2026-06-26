@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
+import { LoadingState, Spinner } from '../components/ui/Spinner';
 import { Textarea } from '../components/ui/Textarea';
 import { approveManagerClaim, getManagerClaim, rejectManagerClaim, requestClaimRevision } from '../features/approvals/api';
 import type { ReviewClaim } from '../features/approvals/types';
@@ -63,7 +64,7 @@ export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
   const backPath = mode === 'manager' ? '/approvals' : '/finance-review';
 
   if (claimQuery.isLoading) {
-    return <div className="text-sm text-slate-500">Loading claim...</div>;
+    return <LoadingState className="min-h-[240px]" label="Loading claim..." />;
   }
 
   if (!claim) {
@@ -177,6 +178,7 @@ export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
                 onClick={() => downloadMutation.mutate(attachment)}
                 disabled={downloadMutation.isPending}
               >
+                {downloadMutation.isPending && <Spinner size="sm" />}
                 View
               </Button>
             </div>
@@ -247,6 +249,7 @@ export function ReviewDetailPage({ mode }: { mode: ReviewMode }) {
                 ((pendingAction === 'manager-reject' || pendingAction === 'manager-revision') && !note.trim())
               }
             >
+              {actionMutation.isPending && <Spinner size="sm" className="text-white" />}
               Submit
             </Button>
           </div>

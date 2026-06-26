@@ -5,7 +5,7 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
-import { Table, Td, Th } from '../components/ui/Table';
+import { Table, TableLoadingRow, Td, Th } from '../components/ui/Table';
 import { useAuth } from '../features/auth/useAuth';
 import { listActiveCategories } from '../features/claims/api';
 import { formatCurrency } from '../features/claims/currency';
@@ -201,6 +201,7 @@ export function ReportsPage() {
             </tr>
           </thead>
           <tbody>
+            {reportsQuery.isLoading && <TableLoadingRow colSpan={7} label="Loading report rows..." />}
             {reports.map((row) => (
               <tr key={row.claimId}>
                 <Td className="min-w-52">

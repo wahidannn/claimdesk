@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router-dom';
+import { LoadingState } from '../components/ui/Spinner';
 import type { Role } from '../features/auth/types';
 import { useAuth } from '../features/auth/useAuth';
 
@@ -12,8 +13,8 @@ export function RoleRoute({ roles, children }: RoleRouteProps) {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-muted text-sm text-slate-600">
-        Loading session...
+      <div className="flex min-h-screen items-center justify-center bg-muted">
+        <LoadingState label="Loading session..." />
       </div>
     );
   }

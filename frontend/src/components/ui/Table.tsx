@@ -1,5 +1,6 @@
 import type { TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes } from 'react';
 import { cn } from '../../lib/utils';
+import { LoadingState } from './Spinner';
 
 export function Table({ className, ...props }: TableHTMLAttributes<HTMLTableElement>) {
   return (
@@ -29,4 +30,14 @@ export function Th({ className, ...props }: ThHTMLAttributes<HTMLTableCellElemen
 
 export function Td({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
   return <td className={cn('border-b border-border px-4 py-2.5 align-middle text-ink', className)} {...props} />;
+}
+
+export function TableLoadingRow({ colSpan, label = 'Loading data...' }: { colSpan: number; label?: string }) {
+  return (
+    <tr>
+      <Td colSpan={colSpan} className="py-7">
+        <LoadingState label={label} />
+      </Td>
+    </tr>
+  );
 }
